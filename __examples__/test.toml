@@ -1,0 +1,6 @@
+name = "bloom"
+cwd = "~/dev/bloom"
+
+[window.docker]
+  [pane.0]
+    command = "echo coucou"
