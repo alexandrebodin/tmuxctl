@@ -8,14 +8,20 @@ import (
 	"github.com/BurntSushi/toml"
 )
 
+type paneConfig struct {
+}
+
 type windowConfig struct {
-	Dir string
+	Name   string
+	Dir    string
+	Layout string
+	Panes  []*paneConfig
 }
 
 type config struct {
 	Name    string
 	Dir     string
-	Windows map[string]*windowConfig
+	Windows []*windowConfig
 }
 
 func main() {
@@ -41,12 +47,22 @@ func main() {
 		Dir:  conf.Dir,
 	}
 
-	for winName, winConfig := range conf.Windows {
+	for _, winConfig := range conf.Windows {
 		window := &window{
-			Sess: sess,
-			Name: winName,
-			Dir:  winConfig.Dir,
+			Sess:   sess,
+			Name:   winConfig.Name,
+			Dir:    winConfig.Dir,
+			Layout: winConfig.Layout,
 		}
+
+		if winConfig.Dir == "" {
+			window.Dir = sess.Dir
+		}
+
+		for range winConfig.Panes {
+			window.Panes = append(window.Panes, &pane{})
+		}
+
 		sess.addWindow(window)
 	}
 

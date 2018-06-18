@@ -1,10 +1,22 @@
 name = "test"
 dir = "/Users/alx0u/dev/bloom"
 
-[windows.docker]
+[[windows]]
+  name="docker"
+  dir="/Users/alx0u/dev/bloom/dashboard-docker"
+  layout="tiled"
 
-[windows.hub]
+  [[windows.panes]]
+  [[windows.panes]]
 
-[windows.dashboard]
+[[windows]]
+name="hub"
+dir="/Users/alx0u/dev/bloom/bloom-hub"
 
-[windows.ssh]
+[[windows]]
+name="dashboard"
+dir="/Users/alx0u/dev/bloom/dashboard"
+
+[[windows]]
+name="ssh"
+dir="/Users/alx0u/dev/bloom"

@@ -19,7 +19,8 @@ func (sess *session) addWindow(w *window) {
 }
 
 func (sess *session) start() error {
-	cmd := exec.Command("tmux", "new-session", "-d", "-s", sess.Name, "-c", sess.Dir, "-n", sess.Windows[0].Name)
+	firstWindow := sess.Windows[0]
+	cmd := exec.Command("tmux", "new-session", "-d", "-s", sess.Name, "-c", firstWindow.Dir, "-n", firstWindow.Name)
 	var stderr bytes.Buffer
 	cmd.Stderr = &stderr
 	runError := cmd.Run()
@@ -34,6 +35,11 @@ func (sess *session) start() error {
 				return fmt.Errorf("Error starting window %v", err)
 			}
 		}
+	}
+
+	for _, win := range sess.Windows {
+		win.renderPane()
+		win.renderLayout()
 	}
 
 	cmd = exec.Command("tmux", "select-window", "-t", sess.Name+":"+sess.Windows[0].Name)
