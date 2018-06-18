@@ -2,35 +2,20 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"os"
-	"os/exec"
-	"syscall"
 
 	"github.com/BurntSushi/toml"
 )
 
-type Session struct {
-	Name string
-	Dir  string
+type windowConfig struct {
+	Dir string
 }
 
-func (sess *Session) Sart() error {
-	cmd := exec.Command("tmux", "new-session", "-d", "-s", sess.Name)
-	err := cmd.Run()
-	if err != nil {
-		return fmt.Errorf("Error Creating tmux session %s", err)
-	}
-
-	tmux, err := exec.LookPath("tmux")
-	if err != nil {
-		return fmt.Errorf("Error looking up tmux %s", err)
-	}
-
-	args := []string{"tmux", "attach", "-t", sess.Name}
-	if sysErr := syscall.Exec(tmux, args, os.Environ()); sysErr != nil {
-		return fmt.Errorf("Error attaching to session %s, %s", sess.Name, sysErr)
-	}
-	return nil
+type config struct {
+	Name    string
+	Dir     string
+	Windows map[string]*windowConfig
 }
 
 func main() {
@@ -42,19 +27,34 @@ func main() {
 
 	filePath := args[0]
 
-	var conf map[string]interface{}
+	var conf config
 	if _, err := toml.DecodeFile(filePath, &conf); err != nil {
 		panic(fmt.Errorf("Error decoding configuration %s", err))
 	}
 
-	sess := &Session{
-		Name: conf["name"].(string),
-		Dir:  conf["cwd"].(string),
+	if _, err := os.Stat(conf.Dir); err != nil {
+		log.Fatal(err)
 	}
 
-	err := sess.Sart()
+	sess := &session{
+		Name: conf.Name,
+		Dir:  conf.Dir,
+	}
+
+	for winName, winConfig := range conf.Windows {
+		window := &window{
+			Sess: sess,
+			Name: winName,
+			Dir:  winConfig.Dir,
+		}
+		sess.addWindow(window)
+	}
+
+	err := sess.start()
 
 	if err != nil {
-		fmt.Println(err)
+		log.Fatal(err)
 	}
+
+	sess.attach()
 }

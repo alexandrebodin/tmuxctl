@@ -1,6 +1,10 @@
-name = "bloom"
-cwd = "~/dev/bloom"
+name = "test"
+dir = "/Users/alx0u/dev/bloom"
 
-[window.docker]
-  [pane.0]
-    command = "echo coucou"
+[windows.docker]
+
+[windows.hub]
+
+[windows.dashboard]
+
+[windows.ssh]
