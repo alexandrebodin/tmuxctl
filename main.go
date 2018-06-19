@@ -9,6 +9,7 @@ import (
 )
 
 type paneConfig struct {
+	Dir string
 }
 
 type windowConfig struct {
@@ -25,7 +26,7 @@ type config struct {
 }
 
 func main() {
-	args := []string{".tmuxrc"}
+	args := []string{".tmuxctlrc"}
 
 	if len(os.Args) > 1 {
 		args = os.Args[1:]
@@ -55,12 +56,19 @@ func main() {
 			Layout: winConfig.Layout,
 		}
 
+		if winConfig.Layout == "" {
+			window.Layout = "tiled"
+		}
+
 		if winConfig.Dir == "" {
 			window.Dir = sess.Dir
 		}
 
-		for range winConfig.Panes {
-			window.Panes = append(window.Panes, &pane{})
+		for _, paneConfig := range winConfig.Panes {
+			window.Panes = append(window.Panes, &pane{
+				Dir:    paneConfig.Dir,
+				Window: window,
+			})
 		}
 
 		sess.addWindow(window)

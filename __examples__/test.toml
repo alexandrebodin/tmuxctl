@@ -10,13 +10,20 @@ dir = "/Users/alx0u/dev/bloom"
   [[windows.panes]]
 
 [[windows]]
-name="hub"
-dir="/Users/alx0u/dev/bloom/bloom-hub"
+  name="hub"
+  dir="/Users/alx0u/dev/bloom/bloom-hub"
+  layout="main-horizontal"
+
+  [[windows.panes]]
+  [[windows.panes]]
+    dir="/Users/alx0u/dev/bloom/bloom-hub/apps/api"
+  [[windows.panes]]
+    dir="/Users/alx0u/dev/bloom/bloom-hub/apps/app"
 
 [[windows]]
-name="dashboard"
-dir="/Users/alx0u/dev/bloom/dashboard"
+  name="dashboard"
+  dir="/Users/alx0u/dev/bloom/dashboard"
 
 [[windows]]
-name="ssh"
-dir="/Users/alx0u/dev/bloom"
+  name="ssh"
+  dir="/Users/alx0u/dev/bloom"
