@@ -32,6 +32,32 @@ type window struct {
 	Panes  []*pane
 }
 
+func newWindow(sess *session, config windowConfig) *window {
+	win := &window{
+		Sess:   sess,
+		Name:   config.Name,
+		Dir:    config.Dir,
+		Layout: config.Layout,
+	}
+
+	if config.Layout == "" {
+		win.Layout = "tiled"
+	}
+
+	if config.Dir == "" {
+		win.Dir = sess.Dir
+	}
+
+	for _, paneConfig := range config.Panes {
+		win.Panes = append(win.Panes, &pane{
+			Dir:    paneConfig.Dir,
+			Window: win,
+		})
+	}
+
+	return win
+}
+
 func (w *window) start() error {
 	cmd := exec.Command("tmux", "new-window", "-t", w.Sess.Name, "-n", w.Name, "-c", w.Dir)
 	var stderr bytes.Buffer

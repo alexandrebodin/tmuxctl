@@ -1,29 +1,12 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"os"
 
 	"github.com/BurntSushi/toml"
+	"github.com/alexandrebodin/tmuxctl/tmux"
 )
-
-type paneConfig struct {
-	Dir string
-}
-
-type windowConfig struct {
-	Name   string
-	Dir    string
-	Layout string
-	Panes  []*paneConfig
-}
-
-type config struct {
-	Name    string
-	Dir     string
-	Windows []*windowConfig
-}
 
 func main() {
 	args := []string{".tmuxctlrc"}
@@ -34,50 +17,31 @@ func main() {
 
 	filePath := args[0]
 
-	var conf config
+	var conf sessionConfig
 	if _, err := toml.DecodeFile(filePath, &conf); err != nil {
-		panic(fmt.Errorf("Error decoding configuration %s", err))
+		log.Fatalf("Error loading configuration %v\n", err)
 	}
 
 	if _, err := os.Stat(conf.Dir); err != nil {
-		log.Fatal(err)
+		log.Fatalf("Error with session directory %v\n", err)
 	}
 
-	sess := &session{
-		Name: conf.Name,
-		Dir:  conf.Dir,
-	}
+	sess := newSession(conf)
 
-	for _, winConfig := range conf.Windows {
-		window := &window{
-			Sess:   sess,
-			Name:   winConfig.Name,
-			Dir:    winConfig.Dir,
-			Layout: winConfig.Layout,
-		}
-
-		if winConfig.Layout == "" {
-			window.Layout = "tiled"
-		}
-
-		if winConfig.Dir == "" {
-			window.Dir = sess.Dir
-		}
-
-		for _, paneConfig := range winConfig.Panes {
-			window.Panes = append(window.Panes, &pane{
-				Dir:    paneConfig.Dir,
-				Window: window,
-			})
-		}
-
-		sess.addWindow(window)
-	}
-
-	err := sess.start()
+	runningSessions, err := tmux.ListSessions()
 
 	if err != nil {
-		log.Fatal(err)
+		log.Fatalf("Error getting tmux status %v\n", err)
+	}
+
+	if _, ok := runningSessions[sess.Name]; ok {
+		log.Fatalf("Session %s is already running", sess.Name)
+	}
+
+	err = sess.start()
+
+	if err != nil {
+		log.Fatalf("Error starting session %v\n", err)
 	}
 
 	sess.attach()

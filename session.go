@@ -14,6 +14,21 @@ type session struct {
 	Windows []*window
 }
 
+func newSession(config sessionConfig) *session {
+
+	sess := &session{
+		Name: config.Name,
+		Dir:  config.Dir,
+	}
+
+	for _, winConfig := range config.Windows {
+		window := newWindow(sess, winConfig)
+		sess.addWindow(window)
+	}
+
+	return sess
+}
+
 func (sess *session) addWindow(w *window) {
 	sess.Windows = append(sess.Windows, w)
 }
