@@ -20,12 +20,22 @@ func (sess *session) addWindow(w *window) {
 
 func (sess *session) start() error {
 	firstWindow := sess.Windows[0]
-	cmd := exec.Command("tmux", "new-session", "-d", "-s", sess.Name, "-c", firstWindow.Dir, "-n", firstWindow.Name)
+	cmd := exec.Command("tmux", "new-session", "-d", "-s", sess.Name, "-c", sess.Dir, "-n", firstWindow.Name)
 	var stderr bytes.Buffer
 	cmd.Stderr = &stderr
 	runError := cmd.Run()
 	if runError != nil {
 		return fmt.Errorf("Error Creating tmux session: %v, %q", runError, stderr.String())
+	}
+
+	if firstWindow.Dir != "" {
+		cmd := exec.Command("tmux", "send-keys", "-t", sess.Name+":"+firstWindow.Name, "cd "+firstWindow.Dir, "C-m")
+		var stderr bytes.Buffer
+		cmd.Stderr = &stderr
+		runError := cmd.Run()
+		if runError != nil {
+			return fmt.Errorf("Error Settings window dir: %v, %q", runError, stderr.String())
+		}
 	}
 
 	if len(sess.Windows) > 1 {

@@ -1,4 +1,4 @@
-name = "test"
+name = "tmuxctl_test"
 dir = "/Users/alx0u/dev/bloom"
 
 [[windows]]
@@ -6,7 +6,6 @@ dir = "/Users/alx0u/dev/bloom"
   dir="/Users/alx0u/dev/bloom/dashboard-docker"
   layout="tiled"
 
-  [[windows.panes]]
   [[windows.panes]]
 
 [[windows]]
