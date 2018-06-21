@@ -1,9 +1,6 @@
 name = "tmuxctl_test"
 dir = "~/dev/bloom"
 
-# window to start on
-window = "hub"
-
 [[windows]]
   name="docker"
   dir="~/dev/bloom/dashboard-docker"
@@ -11,6 +8,7 @@ window = "hub"
 
   [[windows.panes]]
     dir="~/dev/bloom/fb_scraper"
+  [[windows.panes]]
 
 [[windows]]
   name="hub"

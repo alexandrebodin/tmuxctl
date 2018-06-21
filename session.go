@@ -10,13 +10,13 @@ import (
 )
 
 type session struct {
-	Name    string
-	Dir     string
-	Windows []*window
+	TmuxOptions *tmux.Options
+	Name        string
+	Dir         string
+	Windows     []*window
 }
 
 func newSession(config sessionConfig) *session {
-
 	sess := &session{
 		Name: config.Name,
 		Dir:  lookupDir(config.Dir),

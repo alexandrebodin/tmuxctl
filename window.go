@@ -11,8 +11,13 @@ type pane struct {
 
 func newPane(win *window, config paneConfig) *pane {
 	pane := &pane{
-		Dir:    lookupDir(config.Dir),
 		Window: win,
+	}
+
+	if config.Dir != "" {
+		pane.Dir = lookupDir(config.Dir)
+	} else {
+		pane.Dir = win.Dir
 	}
 	return pane
 }
@@ -62,18 +67,14 @@ func (w *window) renderPane() error {
 
 	firstPane := w.Panes[0]
 	if firstPane.Dir != "" && firstPane.Dir != w.Dir { // we need to move the pane
-		_, err := tmux.Exec("send-keys", "-t", w.Sess.Name+":"+w.Name+".1", "cd "+firstPane.Dir, "C-m")
+		_, err := tmux.Exec("send-keys", "-t", w.Sess.Name+":"+w.Name+"."+w.Sess.TmuxOptions.PaneBaseIndex, "cd "+firstPane.Dir, "C-m")
 		if err != nil {
 			return err
 		}
 	}
 
 	for _, pane := range w.Panes[1:] {
-		args := []string{"split-window", "-t", w.Sess.Name + ":" + w.Name}
-
-		if pane.Dir != "" {
-			args = append(args, "-c", pane.Dir)
-		}
+		args := []string{"split-window", "-t", w.Sess.Name + ":" + w.Name, "-c", pane.Dir}
 
 		_, err := tmux.Exec(args...)
 		if err != nil {

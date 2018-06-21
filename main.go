@@ -22,13 +22,18 @@ func main() {
 		log.Fatalf("Error loading configuration %v\n", err)
 	}
 
-	sess := newSession(conf)
-
 	runningSessions, err := tmux.ListSessions()
-
 	if err != nil {
-		log.Fatalf("Error getting tmux status %v\n", err)
+		log.Fatal(err)
 	}
+
+	options, err := tmux.GetOptions()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	sess := newSession(conf)
+	sess.TmuxOptions = options
 
 	if _, ok := runningSessions[sess.Name]; ok {
 		log.Fatalf("Session %s is already running", sess.Name)
@@ -40,5 +45,5 @@ func main() {
 		log.Fatalf("Error starting session %v\n", err)
 	}
 
-	// sess.attach()
+	sess.attach()
 }

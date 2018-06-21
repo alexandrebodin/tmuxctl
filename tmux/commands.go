@@ -19,8 +19,6 @@ func Exec(args ...string) (Result, error) {
 	var stderr bytes.Buffer
 	var stdout bytes.Buffer
 
-	fmt.Println(args)
-
 	cmd := exec.Command("tmux", args...)
 	cmd.Stdin = &stdin
 	cmd.Stdout = &stdout
@@ -55,4 +53,38 @@ func ListSessions() (map[string]SessionInfo, error) {
 	}
 
 	return sessionMap, nil
+}
+
+type Options struct {
+	BaseIndex     string
+	PaneBaseIndex string
+}
+
+func GetOptions() (*Options, error) {
+	options := &Options{}
+
+	var stderr bytes.Buffer
+	var stdout bytes.Buffer
+	cmd := exec.Command("sh", "-c", "tmux start-server\\; show-options -g\\; show-window-options -g")
+	cmd.Stdout = &stdout
+
+	err := cmd.Run()
+	if err != nil {
+		return options, fmt.Errorf("Error gettings tmux options %v, %s", err, stderr.String())
+	}
+
+	optionsString := strings.Split(stdout.String(), "\n")
+	for _, option := range optionsString {
+		optionSplits := strings.Split(option, " ")
+		if len(optionSplits) == 2 {
+			name := optionSplits[0]
+			if name == "base-index" {
+				options.BaseIndex = optionSplits[1]
+			} else if name == "pane-base-index" {
+				options.PaneBaseIndex = optionSplits[1]
+			}
+		}
+	}
+
+	return options, nil
 }
