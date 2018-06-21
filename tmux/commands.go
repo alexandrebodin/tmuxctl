@@ -19,6 +19,8 @@ func Exec(args ...string) (Result, error) {
 	var stderr bytes.Buffer
 	var stdout bytes.Buffer
 
+	fmt.Println(args)
+
 	cmd := exec.Command("tmux", args...)
 	cmd.Stdin = &stdin
 	cmd.Stdout = &stdout

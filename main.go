@@ -22,10 +22,6 @@ func main() {
 		log.Fatalf("Error loading configuration %v\n", err)
 	}
 
-	if _, err := os.Stat(conf.Dir); err != nil {
-		log.Fatalf("Error with session directory %v\n", err)
-	}
-
 	sess := newSession(conf)
 
 	runningSessions, err := tmux.ListSessions()
@@ -44,5 +40,5 @@ func main() {
 		log.Fatalf("Error starting session %v\n", err)
 	}
 
-	sess.attach()
+	// sess.attach()
 }

@@ -1,28 +1,35 @@
 name = "tmuxctl_test"
-dir = "/Users/alx0u/dev/bloom"
+dir = "~/dev/bloom"
+
+# window to start on
+window = "hub"
 
 [[windows]]
   name="docker"
-  dir="/Users/alx0u/dev/bloom/dashboard-docker"
+  dir="~/dev/bloom/dashboard-docker"
   layout="tiled"
 
   [[windows.panes]]
+    dir="~/dev/bloom/fb_scraper"
 
 [[windows]]
   name="hub"
-  dir="/Users/alx0u/dev/bloom/bloom-hub"
+  dir="~/dev/bloom/bloom-hub"
   layout="main-horizontal"
 
   [[windows.panes]]
   [[windows.panes]]
-    dir="/Users/alx0u/dev/bloom/bloom-hub/apps/api"
+    dir="~/dev/bloom/bloom-hub/apps/api"
   [[windows.panes]]
-    dir="/Users/alx0u/dev/bloom/bloom-hub/apps/app"
+    dir="~/dev/bloom/bloom-hub/apps/app"
 
 [[windows]]
   name="dashboard"
-  dir="/Users/alx0u/dev/bloom/dashboard"
+  dir="~/dev/bloom/dashboard"
+
+  [[windows.panes]]
+  [[windows.panes]]
+    dir="~/dev/bloom/dashboard/scripts"
 
 [[windows]]
   name="ssh"
-  dir="/Users/alx0u/dev/bloom"

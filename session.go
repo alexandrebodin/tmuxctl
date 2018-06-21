@@ -1,11 +1,12 @@
 package main
 
 import (
-	"bytes"
 	"fmt"
 	"os"
 	"os/exec"
 	"syscall"
+
+	"github.com/alexandrebodin/tmuxctl/tmux"
 )
 
 type session struct {
@@ -18,7 +19,7 @@ func newSession(config sessionConfig) *session {
 
 	sess := &session{
 		Name: config.Name,
-		Dir:  config.Dir,
+		Dir:  lookupDir(config.Dir),
 	}
 
 	for _, winConfig := range config.Windows {
@@ -35,21 +36,15 @@ func (sess *session) addWindow(w *window) {
 
 func (sess *session) start() error {
 	firstWindow := sess.Windows[0]
-	cmd := exec.Command("tmux", "new-session", "-d", "-s", sess.Name, "-c", sess.Dir, "-n", firstWindow.Name)
-	var stderr bytes.Buffer
-	cmd.Stderr = &stderr
-	runError := cmd.Run()
-	if runError != nil {
-		return fmt.Errorf("Error Creating tmux session: %v, %q", runError, stderr.String())
+	_, err := tmux.Exec("new-session", "-d", "-s", sess.Name, "-c", sess.Dir, "-n", firstWindow.Name)
+	if err != nil {
+		return err
 	}
 
-	if firstWindow.Dir != "" {
-		cmd := exec.Command("tmux", "send-keys", "-t", sess.Name+":"+firstWindow.Name, "cd "+firstWindow.Dir, "C-m")
-		var stderr bytes.Buffer
-		cmd.Stderr = &stderr
-		runError := cmd.Run()
-		if runError != nil {
-			return fmt.Errorf("Error Settings window dir: %v, %q", runError, stderr.String())
+	if firstWindow.Dir != sess.Dir {
+		_, err := tmux.Exec("send-keys", "-t", sess.Name+":"+firstWindow.Name, "cd "+firstWindow.Dir, "C-m")
+		if err != nil {
+			return err
 		}
 	}
 
@@ -65,13 +60,6 @@ func (sess *session) start() error {
 	for _, win := range sess.Windows {
 		win.renderPane()
 		win.renderLayout()
-	}
-
-	cmd = exec.Command("tmux", "select-window", "-t", sess.Name+":"+sess.Windows[0].Name)
-	cmd.Stderr = &stderr
-	runError = cmd.Run()
-	if runError != nil {
-		return fmt.Errorf("Error Creating tmux session: %v, %q", runError, stderr.String())
 	}
 
 	return nil
