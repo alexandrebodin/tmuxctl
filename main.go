@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 	"os"
+	"strconv"
 
 	"github.com/BurntSushi/toml"
 	"github.com/alexandrebodin/tmuxctl/tmux"
@@ -52,11 +53,12 @@ func main() {
 			log.Fatalf("Error selecting window %s: %v\n", conf.SelectWindow, err)
 		}
 
-		if conf.SelectPane != "" {
-			_, err := tmux.Exec("select-pane", "-t", sess.Name+":"+conf.SelectWindow+"."+conf.SelectPane)
+		if conf.SelectPane != 0 {
+			index := strconv.Itoa(conf.SelectPane + (options.PaneBaseIndex - 1))
+			_, err := tmux.Exec("select-pane", "-t", sess.Name+":"+conf.SelectWindow+"."+index)
 
 			if err != nil {
-				log.Fatalf("Error selecting pane %s: %v\n", conf.SelectPane, err)
+				log.Fatalf("Error selecting pane %d: %v\n", conf.SelectPane, err)
 			}
 		}
 	}

@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"os/exec"
+	"strconv"
 	"strings"
 )
 
@@ -56,12 +57,15 @@ func ListSessions() (map[string]SessionInfo, error) {
 }
 
 type Options struct {
-	BaseIndex     string
-	PaneBaseIndex string
+	BaseIndex     int
+	PaneBaseIndex int
 }
 
 func GetOptions() (*Options, error) {
-	options := &Options{}
+	options := &Options{
+		BaseIndex:     0,
+		PaneBaseIndex: 0,
+	}
 
 	var stderr bytes.Buffer
 	var stdout bytes.Buffer
@@ -79,9 +83,14 @@ func GetOptions() (*Options, error) {
 		if len(optionSplits) == 2 {
 			name := optionSplits[0]
 			if name == "base-index" {
-				options.BaseIndex = optionSplits[1]
+				if v, err := strconv.Atoi(optionSplits[1]); err == nil {
+					options.BaseIndex = v
+				}
 			} else if name == "pane-base-index" {
-				options.PaneBaseIndex = optionSplits[1]
+				if v, err := strconv.Atoi(optionSplits[1]); err == nil {
+					options.PaneBaseIndex = v
+				}
+
 			}
 		}
 	}

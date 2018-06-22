@@ -5,7 +5,8 @@ dir = "~/dev/bloom"
 select-window = "hub" 
 # selects the pane to start in.
 # must select a window  first, otherwise ignored
-select-pane = "3"
+# first panel is 1 and so on...
+select-pane = 3
 
 [[windows]]
   name="docker"

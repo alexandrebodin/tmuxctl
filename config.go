@@ -16,5 +16,5 @@ type sessionConfig struct {
 	Dir          string
 	Windows      []windowConfig
 	SelectWindow string `toml:"select-window"`
-	SelectPane   string `toml:"select-pane"`
+	SelectPane   int    `toml:"select-pane"`
 }

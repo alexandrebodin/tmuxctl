@@ -1,6 +1,8 @@
 package main
 
 import (
+	"strconv"
+
 	"github.com/alexandrebodin/tmuxctl/tmux"
 )
 
@@ -67,7 +69,7 @@ func (w *window) renderPane() error {
 
 	firstPane := w.Panes[0]
 	if firstPane.Dir != "" && firstPane.Dir != w.Dir { // we need to move the pane
-		_, err := tmux.Exec("send-keys", "-t", w.Sess.Name+":"+w.Name+"."+w.Sess.TmuxOptions.PaneBaseIndex, "cd "+firstPane.Dir, "C-m")
+		_, err := tmux.Exec("send-keys", "-t", w.Sess.Name+":"+w.Name+"."+strconv.Itoa(w.Sess.TmuxOptions.PaneBaseIndex), "cd "+firstPane.Dir, "C-m")
 		if err != nil {
 			return err
 		}
