@@ -12,7 +12,9 @@ type windowConfig struct {
 }
 
 type sessionConfig struct {
-	Name    string
-	Dir     string
-	Windows []windowConfig
+	Name         string
+	Dir          string
+	Windows      []windowConfig
+	SelectWindow string `toml:"select-window"`
+	SelectPane   string `toml:"select-pane"`
 }

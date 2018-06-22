@@ -45,5 +45,21 @@ func main() {
 		log.Fatalf("Error starting session %v\n", err)
 	}
 
+	if conf.SelectWindow != "" {
+		_, err := tmux.Exec("select-window", "-t", sess.Name+":"+conf.SelectWindow)
+
+		if err != nil {
+			log.Fatalf("Error selecting window %s: %v\n", conf.SelectWindow, err)
+		}
+
+		if conf.SelectPane != "" {
+			_, err := tmux.Exec("select-pane", "-t", sess.Name+":"+conf.SelectWindow+"."+conf.SelectPane)
+
+			if err != nil {
+				log.Fatalf("Error selecting pane %s: %v\n", conf.SelectPane, err)
+			}
+		}
+	}
+
 	sess.attach()
 }

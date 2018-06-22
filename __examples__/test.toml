@@ -1,6 +1,12 @@
 name = "tmuxctl_test"
 dir = "~/dev/bloom"
 
+# selects the window to start in
+select-window = "hub" 
+# selects the pane to start in.
+# must select a window  first, otherwise ignored
+select-pane = "3"
+
 [[windows]]
   name="docker"
   dir="~/dev/bloom/dashboard-docker"
