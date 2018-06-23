@@ -12,6 +12,7 @@ select-pane = 3
   name="docker"
   dir="~/dev/bloom/dashboard-docker"
   layout="tiled"
+  sync=true
 
   [[windows.panes]]
     dir="~/dev/bloom/fb_scraper"

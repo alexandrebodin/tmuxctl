@@ -58,8 +58,10 @@ func (sess *session) start() error {
 	}
 
 	for _, win := range sess.Windows {
-		win.renderPane()
-		win.renderLayout()
+		err := win.init()
+		if err != nil {
+			return fmt.Errorf("Error initializing window %v", err)
+		}
 	}
 
 	return nil

@@ -29,6 +29,7 @@ type window struct {
 	Name   string
 	Dir    string
 	Layout string
+	Sync   bool
 	Panes  []*pane
 }
 
@@ -37,6 +38,7 @@ func newWindow(sess *session, config windowConfig) *window {
 		Sess:   sess,
 		Name:   config.Name,
 		Layout: config.Layout,
+		Sync:   config.Sync,
 	}
 
 	if config.Dir != "" {
@@ -60,6 +62,25 @@ func (w *window) start() error {
 	args := []string{"new-window", "-t", w.Sess.Name, "-n", w.Name, "-c", w.Dir}
 	_, err := tmux.Exec(args...)
 	return err
+
+}
+
+func (w *window) init() error {
+	err := w.renderPane()
+	if err != nil {
+		return err
+	}
+	err = w.renderLayout()
+	if err != nil {
+		return err
+	}
+
+	if w.Sync {
+		_, err := tmux.Exec("set-window-option", "-t", w.Sess.Name+":"+w.Name, "synchronize-panes")
+		return err
+	}
+
+	return nil
 }
 
 func (w *window) renderPane() error {

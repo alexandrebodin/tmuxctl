@@ -8,6 +8,7 @@ type windowConfig struct {
 	Name   string
 	Dir    string
 	Layout string
+	Sync   bool
 	Panes  []paneConfig
 }
 
