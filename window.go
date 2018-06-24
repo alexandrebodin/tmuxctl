@@ -8,12 +8,14 @@ import (
 
 type pane struct {
 	Dir    string
+	Zoom   bool
 	Window *window
 }
 
 func newPane(win *window, config paneConfig) *pane {
 	pane := &pane{
 		Window: win,
+		Zoom:   config.Zoom,
 	}
 
 	if config.Dir != "" {
@@ -66,11 +68,18 @@ func (w *window) start() error {
 }
 
 func (w *window) init() error {
-	err := w.renderPane()
+	var err error
+	err = w.renderPane()
 	if err != nil {
 		return err
 	}
+
 	err = w.renderLayout()
+	if err != nil {
+		return err
+	}
+
+	err = w.zoomPanes()
 	if err != nil {
 		return err
 	}
@@ -111,4 +120,20 @@ func (w *window) renderPane() error {
 func (w *window) renderLayout() error {
 	_, err := tmux.Exec("select-layout", "-t", w.Sess.Name+":"+w.Name, w.Layout)
 	return err
+}
+
+func (w *window) zoomPanes() error {
+	for idx, pane := range w.Panes {
+		if pane.Zoom {
+			index := strconv.Itoa(idx + w.Sess.TmuxOptions.PaneBaseIndex)
+			_, err := tmux.Exec("resize-pane", "-t", w.Sess.Name+":"+w.Name+"."+index, "-Z")
+			if err != nil {
+				return err
+			}
+
+			return nil // stop after first pane zoomed
+		}
+	}
+
+	return nil
 }
