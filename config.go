@@ -1,8 +1,9 @@
 package main
 
 type paneConfig struct {
-	Dir  string
-	Zoom bool
+	Dir   string
+	Zoom  bool
+	Split string
 }
 
 type windowConfig struct {

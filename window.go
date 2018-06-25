@@ -2,6 +2,7 @@ package main
 
 import (
 	"strconv"
+	"strings"
 
 	"github.com/alexandrebodin/tmuxctl/tmux"
 )
@@ -27,10 +28,6 @@ func newWindow(sess *session, config windowConfig) *window {
 		win.Dir = lookupDir(config.Dir)
 	} else {
 		win.Dir = sess.Dir
-	}
-
-	if config.Layout == "" {
-		win.Layout = "tiled"
 	}
 
 	for _, paneConfig := range config.Panes {
@@ -88,6 +85,9 @@ func (w *window) renderPane() error {
 	for _, pane := range w.Panes[1:] {
 		args := []string{"split-window", "-t", w.Sess.Name + ":" + w.Name, "-c", pane.Dir}
 
+		if pane.Split != "" {
+			args = append(args, strings.Split(pane.Split, " ")...)
+		}
 		_, err := tmux.Exec(args...)
 		if err != nil {
 			return err
@@ -98,8 +98,12 @@ func (w *window) renderPane() error {
 }
 
 func (w *window) renderLayout() error {
-	_, err := tmux.Exec("select-layout", "-t", w.Sess.Name+":"+w.Name, w.Layout)
-	return err
+	if w.Layout != "" {
+		_, err := tmux.Exec("select-layout", "-t", w.Sess.Name+":"+w.Name, w.Layout)
+		return err
+	}
+
+	return nil
 }
 
 func (w *window) zoomPanes() error {

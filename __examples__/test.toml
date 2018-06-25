@@ -2,23 +2,33 @@ name = "tmuxctl_test"
 dir = "~/dev/bloom"
 
 # selects the window to start in
-select-window = "hub" 
+select-window = "docker" 
 # selects the pane to start in.
 # must select a window  first, otherwise ignored
 # first panel is 1 and so on...
-select-pane = 3
+# select-pane = 3
 
 [[windows]]
   name="docker"
   dir="~/dev/bloom/dashboard-docker"
-  layout="tiled"
-  sync=true
+  # layout="tiled"
+  # sync=true 
 
   [[windows.panes]]
     dir="~/dev/bloom/fb_scraper"
-    zoom=true
+    # zoom=true
   [[windows.panes]]
+    # split horizontally and take full height
+    split="-h -p 10" 
   [[windows.panes]]
+    # split vertically and take full width
+    split="-f -v"
+  [[windows.panes]]
+    # split horizontally spanning full height and take 20 cols
+    split="-f -v -l 20"
+  [[windows.panes]]
+    # split vertically spanning full width and take 20 rows
+    split="-f -h -l 50"
 
 [[windows]]
   name="hub"
