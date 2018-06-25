@@ -18,6 +18,7 @@ select-pane = 3
     dir="~/dev/bloom/fb_scraper"
     zoom=true
   [[windows.panes]]
+  [[windows.panes]]
 
 [[windows]]
   name="hub"
