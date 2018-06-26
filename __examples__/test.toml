@@ -16,6 +16,10 @@ select-window = "docker"
 
   [[windows.panes]]
     dir="~/dev/bloom/fb_scraper"
+    scripts=[
+      "ls -larth",
+      "echo coucou"
+    ]
     # zoom=true
   [[windows.panes]]
     # split horizontally and take full height

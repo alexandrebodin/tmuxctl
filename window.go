@@ -61,9 +61,29 @@ func (w *window) init() error {
 		return err
 	}
 
+	err = w.runPaneScripts()
+	if err != nil {
+		return err
+	}
+
 	if w.Sync {
 		_, err := tmux.Exec("set-window-option", "-t", w.Sess.Name+":"+w.Name, "synchronize-panes")
 		return err
+	}
+
+	return nil
+}
+
+func (w *window) runPaneScripts() error {
+	for idx, pane := range w.Panes {
+		index := strconv.Itoa(idx + w.Sess.TmuxOptions.PaneBaseIndex)
+
+		for _, script := range pane.Scripts {
+			_, err := tmux.Exec("send-keys", "-t", w.Sess.Name+":"+w.Name+"."+index, script, "C-m")
+			if err != nil {
+				return err
+			}
+		}
 	}
 
 	return nil

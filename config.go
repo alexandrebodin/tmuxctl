@@ -1,9 +1,10 @@
 package main
 
 type paneConfig struct {
-	Dir   string
-	Zoom  bool
-	Split string
+	Dir     string
+	Zoom    bool
+	Split   string
+	Scripts []string
 }
 
 type windowConfig struct {
