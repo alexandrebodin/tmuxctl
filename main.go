@@ -6,17 +6,23 @@ import (
 	"strconv"
 
 	"github.com/BurntSushi/toml"
+	"github.com/alexandrebodin/go-findup"
 	"github.com/alexandrebodin/tmuxctl/tmux"
 )
 
 func main() {
-	args := []string{".tmuxctlrc"}
-
+	var filePath string
+	var err error
 	if len(os.Args) > 1 {
-		args = os.Args[1:]
+		filePath = os.Args[1]
 	}
 
-	filePath := args[0]
+	if filePath == "" {
+		filePath, err = findup.Find(".tmuxctlrc")
+		if err != nil {
+			log.Fatal(err)
+		}
+	}
 
 	var conf sessionConfig
 	if _, err := toml.DecodeFile(filePath, &conf); err != nil {
