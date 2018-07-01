@@ -8,16 +8,20 @@ import (
 )
 
 type session struct {
-	TmuxOptions *Options
-	Name        string
-	Dir         string
-	Windows     []*window
+	TmuxOptions   *Options
+	Name          string
+	Dir           string
+	Windows       []*window
+	ClearPanes    bool
+	WindowScripts []string
 }
 
 func newSession(config sessionConfig) *session {
 	sess := &session{
-		Name: config.Name,
-		Dir:  lookupDir(config.Dir),
+		Name:          config.Name,
+		Dir:           lookupDir(config.Dir),
+		ClearPanes:    config.ClearPanes,
+		WindowScripts: config.WindowScripts,
 	}
 
 	for _, winConfig := range config.Windows {
@@ -60,6 +64,14 @@ func (sess *session) start() error {
 	}
 
 	for _, win := range sess.Windows {
+
+		for _, script := range sess.WindowScripts {
+			err := SendKeys(sess.Name+":"+win.Name, script)
+			if err != nil {
+				return err
+			}
+		}
+
 		err := win.init()
 		if err != nil {
 			return fmt.Errorf("Error initializing window %v", err)

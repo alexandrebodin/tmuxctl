@@ -109,9 +109,11 @@ func (w *window) runPaneScripts() error {
 		}
 
 		// clearing panes
-		err := SendRawKeys(paneTarget, "C-l")
-		if err != nil {
-			return err
+		if w.Sess.ClearPanes {
+			err := SendRawKeys(paneTarget, "C-l")
+			if err != nil {
+				return err
+			}
 		}
 
 	}
