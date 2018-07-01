@@ -1,4 +1,4 @@
-package tmux
+package main
 
 import (
 	"bytes"
@@ -35,7 +35,7 @@ func Exec(args ...string) (Result, error) {
 
 // SendKeys sends keys to tmux (e.g to run a command)
 func SendKeys(target, keys string) error {
-	_, err := Exec("send-keys", "-t", target, keys, "C-m")
+	_, err := Exec("send-keys", "-R", "-t", target, keys, "C-m")
 	return err
 }
 
@@ -48,7 +48,10 @@ func ListSessions() (map[string]SessionInfo, error) {
 
 	res, err := Exec("ls")
 	if err != nil {
-		return sessionMap, nil
+		if strings.Contains(err.Error(), "no server running on") {
+			return sessionMap, nil
+		}
+		return sessionMap, fmt.Errorf("error listing sessions %v", err)
 	}
 
 	splits := strings.Split(res.Stdout, "\n")
@@ -62,11 +65,13 @@ func ListSessions() (map[string]SessionInfo, error) {
 	return sessionMap, nil
 }
 
+// Options tmux options
 type Options struct {
 	BaseIndex     int
 	PaneBaseIndex int
 }
 
+// GetOptions get tmux options
 func GetOptions() (*Options, error) {
 	options := &Options{
 		BaseIndex:     0,
@@ -80,7 +85,7 @@ func GetOptions() (*Options, error) {
 
 	err := cmd.Run()
 	if err != nil {
-		return options, fmt.Errorf("Error gettings tmux options %v, %s", err, stderr.String())
+		return options, fmt.Errorf("Error getting tmux options %v, %s", err, stderr.String())
 	}
 
 	optionsString := strings.Split(stdout.String(), "\n")

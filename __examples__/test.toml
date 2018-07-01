@@ -29,7 +29,7 @@ select-window = "docker"
       "echo coucou"
     ]
     # split horizontally and take full height
-    split="-h -p 10" 
+    split="-h -p 50" 
   [[windows.panes]]
     scripts=[
       "cat test.text"

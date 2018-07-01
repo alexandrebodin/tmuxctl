@@ -4,10 +4,10 @@ import (
 	"log"
 	"os"
 	"strconv"
+	"strings"
 
 	"github.com/BurntSushi/toml"
 	"github.com/alexandrebodin/go-findup"
-	"github.com/alexandrebodin/tmuxctl/tmux"
 )
 
 func main() {
@@ -24,20 +24,20 @@ func main() {
 		}
 	}
 
+	if strings.Trim(filePath, " ") == "" {
+		log.Fatal("not file path provided")
+	}
+
 	var conf sessionConfig
 	if _, err := toml.DecodeFile(filePath, &conf); err != nil {
 		log.Fatalf("Error loading configuration %v\n", err)
 	}
 
-	runningSessions, err := tmux.ListSessions()
-	if err != nil {
-		log.Fatal(err)
-	}
+	runningSessions, err := ListSessions()
+	checkError(err)
 
-	options, err := tmux.GetOptions()
-	if err != nil {
-		log.Fatal(err)
-	}
+	options, err := GetOptions()
+	checkError(err)
 
 	sess := newSession(conf)
 	sess.TmuxOptions = options
@@ -47,27 +47,25 @@ func main() {
 	}
 
 	err = sess.start()
-
-	if err != nil {
-		log.Fatalf("Error starting session %v\n", err)
-	}
+	checkError(err)
 
 	if conf.SelectWindow != "" {
-		_, err := tmux.Exec("select-window", "-t", sess.Name+":"+conf.SelectWindow)
-
-		if err != nil {
-			log.Fatalf("Error selecting window %s: %v\n", conf.SelectWindow, err)
-		}
+		_, err := Exec("select-window", "-t", sess.Name+":"+conf.SelectWindow)
+		checkError(err)
 
 		if conf.SelectPane != 0 {
 			index := strconv.Itoa(conf.SelectPane + (options.PaneBaseIndex - 1))
-			_, err := tmux.Exec("select-pane", "-t", sess.Name+":"+conf.SelectWindow+"."+index)
-
-			if err != nil {
-				log.Fatalf("Error selecting pane %d: %v\n", conf.SelectPane, err)
-			}
+			_, err := Exec("select-pane", "-t", sess.Name+":"+conf.SelectWindow+"."+index)
+			checkError(err)
 		}
 	}
 
-	sess.attach()
+	err = sess.attach()
+	checkError(err)
+}
+
+func checkError(err error) {
+	if err != nil {
+		log.Fatal(err)
+	}
 }

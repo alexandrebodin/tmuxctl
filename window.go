@@ -3,8 +3,6 @@ package main
 import (
 	"strconv"
 	"strings"
-
-	"github.com/alexandrebodin/tmuxctl/tmux"
 )
 
 type window struct {
@@ -41,14 +39,13 @@ func newWindow(sess *session, config windowConfig) *window {
 
 func (w *window) start() error {
 	args := []string{"new-window", "-t", w.Sess.Name, "-n", w.Name, "-c", w.Dir}
-	_, err := tmux.Exec(args...)
+	_, err := Exec(args...)
 	return err
-
 }
 
 func (w *window) runScripts() error {
 	for _, script := range w.Scripts {
-		err := tmux.SendKeys(w.Sess.Name+":"+w.Name, script)
+		err := SendKeys(w.Sess.Name+":"+w.Name, script)
 		if err != nil {
 			return err
 		}
@@ -84,7 +81,7 @@ func (w *window) init() error {
 	}
 
 	if w.Sync {
-		_, err := tmux.Exec("set-window-option", "-t", w.Sess.Name+":"+w.Name, "synchronize-panes")
+		_, err := Exec("set-window-option", "-t", w.Sess.Name+":"+w.Name, "synchronize-panes")
 		return err
 	}
 
@@ -96,7 +93,7 @@ func (w *window) runPaneScripts() error {
 		index := strconv.Itoa(idx + w.Sess.TmuxOptions.PaneBaseIndex)
 
 		for _, script := range pane.Scripts {
-			err := tmux.SendKeys(w.Sess.Name+":"+w.Name+"."+index, script)
+			err := SendKeys(w.Sess.Name+":"+w.Name+"."+index, script)
 			if err != nil {
 				return err
 			}
@@ -113,7 +110,7 @@ func (w *window) renderPane() error {
 
 	firstPane := w.Panes[0]
 	if firstPane.Dir != "" && firstPane.Dir != w.Dir { // we need to move the pane
-		_, err := tmux.Exec("send-keys", "-t", w.Sess.Name+":"+w.Name+"."+strconv.Itoa(w.Sess.TmuxOptions.PaneBaseIndex), "cd "+firstPane.Dir, "C-m")
+		err := SendKeys(w.Sess.Name+":"+w.Name+"."+strconv.Itoa(w.Sess.TmuxOptions.PaneBaseIndex), "cd "+firstPane.Dir)
 		if err != nil {
 			return err
 		}
@@ -125,7 +122,7 @@ func (w *window) renderPane() error {
 		if pane.Split != "" {
 			args = append(args, strings.Split(pane.Split, " ")...)
 		}
-		_, err := tmux.Exec(args...)
+		_, err := Exec(args...)
 		if err != nil {
 			return err
 		}
@@ -136,7 +133,7 @@ func (w *window) renderPane() error {
 
 func (w *window) renderLayout() error {
 	if w.Layout != "" {
-		_, err := tmux.Exec("select-layout", "-t", w.Sess.Name+":"+w.Name, w.Layout)
+		_, err := Exec("select-layout", "-t", w.Sess.Name+":"+w.Name, w.Layout)
 		return err
 	}
 
@@ -147,7 +144,7 @@ func (w *window) zoomPanes() error {
 	for idx, pane := range w.Panes {
 		if pane.Zoom {
 			index := strconv.Itoa(idx + w.Sess.TmuxOptions.PaneBaseIndex)
-			_, err := tmux.Exec("resize-pane", "-t", w.Sess.Name+":"+w.Name+"."+index, "-Z")
+			_, err := Exec("resize-pane", "-t", w.Sess.Name+":"+w.Name+"."+index, "-Z")
 			if err != nil {
 				return err
 			}

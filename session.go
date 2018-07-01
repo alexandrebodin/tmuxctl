@@ -5,12 +5,10 @@ import (
 	"os"
 	"os/exec"
 	"syscall"
-
-	"github.com/alexandrebodin/tmuxctl/tmux"
 )
 
 type session struct {
-	TmuxOptions *tmux.Options
+	TmuxOptions *Options
 	Name        string
 	Dir         string
 	Windows     []*window
@@ -39,15 +37,16 @@ func (sess *session) start() error {
 	width, height, err := getTermSize()
 
 	firstWindow := sess.Windows[0]
-	_, err = tmux.Exec("new-session", "-d", "-s", sess.Name, "-c", sess.Dir, "-n", firstWindow.Name, "-x", width, "-y", height)
+	_, err = Exec("new-session", "-d", "-s", sess.Name, "-c", sess.Dir, "-n", firstWindow.Name, "-x", width, "-y", height)
 	if err != nil {
-		return err
+		return fmt.Errorf("error starting session %v", err)
 	}
 
 	if firstWindow.Dir != sess.Dir {
-		_, err := tmux.Exec("send-keys", "-t", sess.Name+":"+firstWindow.Name, "cd "+firstWindow.Dir, "C-m")
+		cdCmd := fmt.Sprintf("cd %s", firstWindow.Dir)
+		err := SendKeys(sess.Name+":"+firstWindow.Name, cdCmd)
 		if err != nil {
-			return err
+			return fmt.Errorf("error moving to dir %s, %v", firstWindow.Dir, err)
 		}
 	}
 
