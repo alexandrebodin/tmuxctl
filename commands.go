@@ -39,6 +39,12 @@ func SendKeys(target, keys string) error {
 	return err
 }
 
+// SendRawKeys sends keys to tmux (e.g to run a command)
+func SendRawKeys(target, keys string) error {
+	_, err := Exec("send-keys", "-R", "-t", target, keys)
+	return err
+}
+
 // SessionInfo infos about a running tmux session
 type SessionInfo struct{}
 

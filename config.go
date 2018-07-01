@@ -8,12 +8,13 @@ type paneConfig struct {
 }
 
 type windowConfig struct {
-	Name    string
-	Dir     string
-	Layout  string
-	Sync    bool
-	Scripts []string
-	Panes   []paneConfig
+	Name        string
+	Dir         string
+	Layout      string
+	Sync        bool
+	Scripts     []string
+	Panes       []paneConfig
+	PaneScripts []string `toml:"pane-scripts"`
 }
 
 type sessionConfig struct {

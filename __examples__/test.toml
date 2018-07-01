@@ -11,11 +11,16 @@ select-window = "docker"
 [[windows]]
   name="docker"
   dir="~/dev/bloom/dashboard-docker"
-  # runs in the inital window pane before splitting
+  # runs in the inital window before panes creation
   scripts=[
     "touch test.text",
     "echo hello > test.text",
     "cd ../"
+  ]
+
+  # runs in each pane before pane's own scripts
+  pane-scripts= [
+    "echo new pane"
   ]
   # layout="tiled"
   # sync=true 

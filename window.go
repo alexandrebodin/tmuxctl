@@ -6,22 +6,24 @@ import (
 )
 
 type window struct {
-	Sess    *session
-	Name    string
-	Dir     string
-	Layout  string
-	Sync    bool
-	Scripts []string
-	Panes   []*pane
+	Sess        *session
+	Name        string
+	Dir         string
+	Layout      string
+	Sync        bool
+	Scripts     []string
+	Panes       []*pane
+	PaneScripts []string
 }
 
 func newWindow(sess *session, config windowConfig) *window {
 	win := &window{
-		Sess:    sess,
-		Name:    config.Name,
-		Layout:  config.Layout,
-		Sync:    config.Sync,
-		Scripts: config.Scripts,
+		Sess:        sess,
+		Name:        config.Name,
+		Layout:      config.Layout,
+		Sync:        config.Sync,
+		Scripts:     config.Scripts,
+		PaneScripts: config.PaneScripts,
 	}
 
 	if config.Dir != "" {
@@ -90,14 +92,28 @@ func (w *window) init() error {
 
 func (w *window) runPaneScripts() error {
 	for idx, pane := range w.Panes {
-		index := strconv.Itoa(idx + w.Sess.TmuxOptions.PaneBaseIndex)
+		paneTarget := w.Sess.Name + ":" + w.Name + "." + strconv.Itoa(idx+w.Sess.TmuxOptions.PaneBaseIndex)
 
-		for _, script := range pane.Scripts {
-			err := SendKeys(w.Sess.Name+":"+w.Name+"."+index, script)
+		for _, script := range w.PaneScripts {
+			err := SendKeys(paneTarget, script)
 			if err != nil {
 				return err
 			}
 		}
+
+		for _, script := range pane.Scripts {
+			err := SendKeys(paneTarget, script)
+			if err != nil {
+				return err
+			}
+		}
+
+		// clearing panes
+		err := SendRawKeys(paneTarget, "C-l")
+		if err != nil {
+			return err
+		}
+
 	}
 
 	return nil
