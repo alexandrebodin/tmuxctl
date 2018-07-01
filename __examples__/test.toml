@@ -11,20 +11,29 @@ select-window = "docker"
 [[windows]]
   name="docker"
   dir="~/dev/bloom/dashboard-docker"
+  # runs in the inital window pane before splitting
+  scripts=[
+    "touch test.text",
+    "echo hello > test.text",
+    "cd ../"
+  ]
   # layout="tiled"
   # sync=true 
 
   [[windows.panes]]
     dir="~/dev/bloom/fb_scraper"
+    # zoom=true
+  [[windows.panes]]
     scripts=[
       "ls -larth",
       "echo coucou"
     ]
-    # zoom=true
-  [[windows.panes]]
     # split horizontally and take full height
     split="-h -p 10" 
   [[windows.panes]]
+    scripts=[
+      "cat test.text"
+    ]
     # split vertically and take full width
     split="-f -v"
   [[windows.panes]]
@@ -38,8 +47,10 @@ select-window = "docker"
   name="hub"
   dir="~/dev/bloom/bloom-hub"
   layout="main-horizontal"
+#  sync=""
 
   [[windows.panes]]
+ #   zoom=true
   [[windows.panes]]
     dir="~/dev/bloom/bloom-hub/apps/api"
   [[windows.panes]]

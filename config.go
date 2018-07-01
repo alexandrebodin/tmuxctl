@@ -8,11 +8,12 @@ type paneConfig struct {
 }
 
 type windowConfig struct {
-	Name   string
-	Dir    string
-	Layout string
-	Sync   bool
-	Panes  []paneConfig
+	Name    string
+	Dir     string
+	Layout  string
+	Sync    bool
+	Scripts []string
+	Panes   []paneConfig
 }
 
 type sessionConfig struct {

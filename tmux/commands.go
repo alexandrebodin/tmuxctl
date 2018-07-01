@@ -33,6 +33,12 @@ func Exec(args ...string) (Result, error) {
 	return Result{stdout.String(), stderr.String()}, nil
 }
 
+// SendKeys sends keys to tmux (e.g to run a command)
+func SendKeys(target, keys string) error {
+	_, err := Exec("send-keys", "-t", target, keys, "C-m")
+	return err
+}
+
 // SessionInfo infos about a running tmux session
 type SessionInfo struct{}
 

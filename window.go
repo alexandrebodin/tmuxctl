@@ -8,20 +8,22 @@ import (
 )
 
 type window struct {
-	Sess   *session
-	Name   string
-	Dir    string
-	Layout string
-	Sync   bool
-	Panes  []*pane
+	Sess    *session
+	Name    string
+	Dir     string
+	Layout  string
+	Sync    bool
+	Scripts []string
+	Panes   []*pane
 }
 
 func newWindow(sess *session, config windowConfig) *window {
 	win := &window{
-		Sess:   sess,
-		Name:   config.Name,
-		Layout: config.Layout,
-		Sync:   config.Sync,
+		Sess:    sess,
+		Name:    config.Name,
+		Layout:  config.Layout,
+		Sync:    config.Sync,
+		Scripts: config.Scripts,
 	}
 
 	if config.Dir != "" {
@@ -44,8 +46,23 @@ func (w *window) start() error {
 
 }
 
+func (w *window) runScripts() error {
+	for _, script := range w.Scripts {
+		err := tmux.SendKeys(w.Sess.Name+":"+w.Name, script)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
 func (w *window) init() error {
 	var err error
+	err = w.runScripts()
+	if err != nil {
+		return err
+	}
+
 	err = w.renderPane()
 	if err != nil {
 		return err
@@ -79,7 +96,7 @@ func (w *window) runPaneScripts() error {
 		index := strconv.Itoa(idx + w.Sess.TmuxOptions.PaneBaseIndex)
 
 		for _, script := range pane.Scripts {
-			_, err := tmux.Exec("send-keys", "-t", w.Sess.Name+":"+w.Name+"."+index, script, "C-m")
+			err := tmux.SendKeys(w.Sess.Name+":"+w.Name+"."+index, script)
 			if err != nil {
 				return err
 			}
