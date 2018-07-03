@@ -2,17 +2,14 @@
 
 Tmuxctl is a tmux session builder. 
 
-## Installation
-
-## Using go get
-
-```sh
-$ go get github.com/alexandrebodin/tmuxctl
-```
-
 ## Quick start
 
-Create a config file named `.tmuxctlrc`
+Install Tmuxctl:
+```
+$ curl -sf https://raw.githubusercontent.com/alexandrebodin/tmuxctl/master/install.sh | sh
+```
+
+Create a `.tmuxctlrc` file:
 ```toml
 name = "tmuxctl_test"
 dir = "~/"
@@ -62,7 +59,7 @@ window-scripts=[
   name="some-extra-window"
 ```
 
-Then run 
-```sh
+Start your tmux session:
+```
 $ tmuxctl
 ```

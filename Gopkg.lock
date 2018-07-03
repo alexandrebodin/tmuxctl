@@ -7,9 +7,15 @@
   revision = "b26d9c308763d68093482582cea63d69be07a0f0"
   version = "v0.3.0"
 
+[[projects]]
+  branch = "master"
+  name = "github.com/alexandrebodin/go-findup"
+  packages = ["."]
+  revision = "59888d10a1b88cca6f370bac45bf153853b96c7a"
+
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "a8c4e8c53820bfbbeb17362c6ff6e9986dff0496086694b77dd1b3560317d100"
+  inputs-digest = "f73f577913d82e89d3e17863d18e9a27f880dcb81a2d6c70be65c3fa0e68281b"
   solver-name = "gps-cdcl"
   solver-version = 1
