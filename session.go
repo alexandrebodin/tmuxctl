@@ -39,6 +39,9 @@ func (sess *session) addWindow(w *window) {
 func (sess *session) start() error {
 	// get term size
 	width, height, err := getTermSize()
+	if err != nil {
+		return err
+	}
 
 	firstWindow := sess.Windows[0]
 	_, err = Exec("new-session", "-d", "-s", sess.Name, "-c", sess.Dir, "-n", firstWindow.Name, "-x", width, "-y", height)

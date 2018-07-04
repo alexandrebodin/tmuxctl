@@ -8,6 +8,27 @@
   version = "v0.3.0"
 
 [[projects]]
+  name = "github.com/alecthomas/kingpin"
+  packages = ["."]
+  revision = "947dcec5ba9c011838740e680966fd7087a71d0d"
+  version = "v2.2.6"
+
+[[projects]]
+  branch = "master"
+  name = "github.com/alecthomas/template"
+  packages = [
+    ".",
+    "parse"
+  ]
+  revision = "a0175ee3bccc567396460bf5acd36800cb10c49c"
+
+[[projects]]
+  branch = "master"
+  name = "github.com/alecthomas/units"
+  packages = ["."]
+  revision = "2efee857e7cfd4f3d0138cc3cbb1b4966962b93a"
+
+[[projects]]
   branch = "master"
   name = "github.com/alexandrebodin/go-findup"
   packages = ["."]
@@ -16,6 +37,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "f73f577913d82e89d3e17863d18e9a27f880dcb81a2d6c70be65c3fa0e68281b"
+  inputs-digest = "75bfb8633943d799630739e6c8657ebf0047f99898d210e12b4bb9a8d42683b0"
   solver-name = "gps-cdcl"
   solver-version = 1

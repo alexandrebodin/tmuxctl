@@ -32,3 +32,11 @@
 [[constraint]]
   name = "github.com/BurntSushi/toml"
   version = "0.3.0"
+
+[[constraint]]
+  branch = "master"
+  name = "github.com/alexandrebodin/go-findup"
+
+[[constraint]]
+  name = "github.com/alecthomas/kingpin"
+  version = "2.2.6"

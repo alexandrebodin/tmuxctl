@@ -1,31 +1,32 @@
 package main
 
 import (
+	"fmt"
 	"log"
-	"os"
 	"strconv"
-	"strings"
 
 	"github.com/BurntSushi/toml"
+	"github.com/alecthomas/kingpin"
 	"github.com/alexandrebodin/go-findup"
 )
 
+var (
+	version = "development"
+	start   = kingpin.Command("start", "start a tmux instance").Default()
+	config  = start.Arg("config", "Tmux config file").Default(".tmuxctlrc").String()
+)
+
 func main() {
-	var filePath string
-	var err error
-	if len(os.Args) > 1 {
-		filePath = os.Args[1]
-	}
+	kingpin.Version(fmt.Sprintf("tmuxct %s", version)).Author("Alexandre BODIN")
+	kingpin.CommandLine.HelpFlag.Short('h')
+	kingpin.CommandLine.VersionFlag.Short('v')
+	kingpin.Parse()
 
-	if filePath == "" {
-		filePath, err = findup.Find(".tmuxctlrc")
-		if err != nil {
-			log.Fatal(err)
-		}
-	}
+	fmt.Printf("Start tmux with config file: %v\n", *config)
 
-	if strings.Trim(filePath, " ") == "" {
-		log.Fatal("not file path provided")
+	filePath, err := findup.Find(*config)
+	if err != nil {
+		log.Fatal(err)
 	}
 
 	var conf sessionConfig
