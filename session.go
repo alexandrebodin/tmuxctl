@@ -16,12 +16,13 @@ type session struct {
 	WindowScripts []string
 }
 
-func newSession(config sessionConfig) *session {
+func newSession(config sessionConfig, options *Options) *session {
 	sess := &session{
 		Name:          config.Name,
 		Dir:           lookupDir(config.Dir),
 		ClearPanes:    config.ClearPanes,
 		WindowScripts: config.WindowScripts,
+		TmuxOptions:   options,
 	}
 
 	for _, winConfig := range config.Windows {
@@ -96,4 +97,14 @@ func (sess *session) attach() error {
 	}
 
 	return nil
+}
+
+func (sess *session) selectWindow(name string) (*window, error) {
+	for _, w := range sess.Windows {
+		if w.Name == name {
+			return w, w.selectWindow()
+		}
+	}
+
+	return nil, fmt.Errorf("Window %s not found", name)
 }

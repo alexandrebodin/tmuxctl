@@ -1,7 +1,7 @@
 package main
 
 import (
-	"strconv"
+	"fmt"
 	"strings"
 )
 
@@ -14,6 +14,7 @@ type window struct {
 	Scripts     []string
 	Panes       []*pane
 	PaneScripts []string
+	Target      string
 }
 
 func newWindow(sess *session, config windowConfig) *window {
@@ -24,6 +25,7 @@ func newWindow(sess *session, config windowConfig) *window {
 		Sync:        config.Sync,
 		Scripts:     config.Scripts,
 		PaneScripts: config.PaneScripts,
+		Target:      sess.Name + ":" + config.Name,
 	}
 
 	if config.Dir != "" {
@@ -32,8 +34,8 @@ func newWindow(sess *session, config windowConfig) *window {
 		win.Dir = sess.Dir
 	}
 
-	for _, paneConfig := range config.Panes {
-		win.Panes = append(win.Panes, newPane(win, paneConfig))
+	for idx, paneConfig := range config.Panes {
+		win.Panes = append(win.Panes, newPane(win, paneConfig, idx))
 	}
 
 	return win
@@ -83,7 +85,7 @@ func (w *window) init() error {
 	}
 
 	if w.Sync {
-		_, err := Exec("set-window-option", "-t", w.Sess.Name+":"+w.Name, "synchronize-panes")
+		_, err := Exec("set-window-option", "-t", w.Target, "synchronize-panes")
 		return err
 	}
 
@@ -91,18 +93,16 @@ func (w *window) init() error {
 }
 
 func (w *window) runPaneScripts() error {
-	for idx, pane := range w.Panes {
-		paneTarget := w.Sess.Name + ":" + w.Name + "." + strconv.Itoa(idx+w.Sess.TmuxOptions.PaneBaseIndex)
-
+	for _, pane := range w.Panes {
 		for _, script := range w.PaneScripts {
-			err := SendKeys(paneTarget, script)
+			err := SendKeys(pane.Target, script)
 			if err != nil {
 				return err
 			}
 		}
 
 		for _, script := range pane.Scripts {
-			err := SendKeys(paneTarget, script)
+			err := SendKeys(pane.Target, script)
 			if err != nil {
 				return err
 			}
@@ -110,7 +110,7 @@ func (w *window) runPaneScripts() error {
 
 		// clearing panes
 		if w.Sess.ClearPanes {
-			err := SendRawKeys(paneTarget, "C-l")
+			err := SendRawKeys(pane.Target, "C-l")
 			if err != nil {
 				return err
 			}
@@ -128,14 +128,14 @@ func (w *window) renderPane() error {
 
 	firstPane := w.Panes[0]
 	if firstPane.Dir != "" && firstPane.Dir != w.Dir { // we need to move the pane
-		err := SendKeys(w.Sess.Name+":"+w.Name+"."+strconv.Itoa(w.Sess.TmuxOptions.PaneBaseIndex), "cd "+firstPane.Dir)
+		err := SendKeys(firstPane.Target, "cd "+firstPane.Dir)
 		if err != nil {
 			return err
 		}
 	}
 
 	for _, pane := range w.Panes[1:] {
-		args := []string{"split-window", "-t", w.Sess.Name + ":" + w.Name, "-c", pane.Dir}
+		args := []string{"split-window", "-t", w.Target, "-c", pane.Dir}
 
 		if pane.Split != "" {
 			args = append(args, strings.Split(pane.Split, " ")...)
@@ -151,7 +151,7 @@ func (w *window) renderPane() error {
 
 func (w *window) renderLayout() error {
 	if w.Layout != "" {
-		_, err := Exec("select-layout", "-t", w.Sess.Name+":"+w.Name, w.Layout)
+		_, err := Exec("select-layout", "-t", w.Target, w.Layout)
 		return err
 	}
 
@@ -159,10 +159,9 @@ func (w *window) renderLayout() error {
 }
 
 func (w *window) zoomPanes() error {
-	for idx, pane := range w.Panes {
+	for _, pane := range w.Panes {
 		if pane.Zoom {
-			index := strconv.Itoa(idx + w.Sess.TmuxOptions.PaneBaseIndex)
-			_, err := Exec("resize-pane", "-t", w.Sess.Name+":"+w.Name+"."+index, "-Z")
+			_, err := Exec("resize-pane", "-t", pane.Target, "-Z")
 			if err != nil {
 				return err
 			}
@@ -172,4 +171,18 @@ func (w *window) zoomPanes() error {
 	}
 
 	return nil
+}
+
+func (w *window) selectWindow() error {
+	_, err := Exec("select-window", "-t", w.Target)
+	return err
+}
+
+func (w *window) selectPane(index int) (*pane, error) {
+	if index > len(w.Panes) {
+		return nil, fmt.Errorf("Pane %d not found", index)
+	}
+
+	p := w.Panes[index-1]
+	return p, p.selectPane()
 }

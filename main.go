@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 	"log"
-	"strconv"
+	"os"
 
 	"github.com/BurntSushi/toml"
 	"github.com/alecthomas/kingpin"
@@ -35,38 +35,45 @@ func main() {
 	}
 
 	runningSessions, err := ListSessions()
-	checkError(err)
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	options, err := GetOptions()
-	checkError(err)
+	if err != nil {
+		log.Fatal(err)
+	}
 
-	sess := newSession(conf)
-	sess.TmuxOptions = options
-
+	sess := newSession(conf, options)
 	if _, ok := runningSessions[sess.Name]; ok {
 		log.Fatalf("Session %s is already running", sess.Name)
+	}
+
+	checkError := func(err error) {
+		if err != nil {
+			log.Println(err)
+			// kill session if an error occurs after starting it
+			Exec("kill-session", "-t", sess.Name)
+			os.Exit(-1)
+		}
 	}
 
 	err = sess.start()
 	checkError(err)
 
 	if conf.SelectWindow != "" {
-		_, err := Exec("select-window", "-t", sess.Name+":"+conf.SelectWindow)
+		w, err := sess.selectWindow(conf.SelectWindow)
 		checkError(err)
 
 		if conf.SelectPane != 0 {
-			index := strconv.Itoa(conf.SelectPane + (options.PaneBaseIndex - 1))
-			_, err := Exec("select-pane", "-t", sess.Name+":"+conf.SelectWindow+"."+index)
+			_, err := w.selectPane(conf.SelectPane)
+			// index := strconv.Itoa(conf.SelectPane + (options.PaneBaseIndex - 1))
+			// target := fmt.Sprintf("%s:%s.%s", sess.Name, conf.SelectWindow, index)
+			// _, err := Exec("select-pane", "-t", target)
 			checkError(err)
 		}
 	}
 
 	err = sess.attach()
 	checkError(err)
-}
-
-func checkError(err error) {
-	if err != nil {
-		log.Fatal(err)
-	}
 }
