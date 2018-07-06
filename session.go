@@ -1,14 +1,17 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"os/exec"
 	"syscall"
+
+	"github.com/alexandrebodin/tmuxctl/tmux"
 )
 
 type session struct {
-	TmuxOptions   *Options
+	TmuxOptions   *tmux.Options
 	Name          string
 	Dir           string
 	Windows       []*window
@@ -16,7 +19,7 @@ type session struct {
 	WindowScripts []string
 }
 
-func newSession(config sessionConfig, options *Options) *session {
+func newSession(config sessionConfig, options *tmux.Options) *session {
 	sess := &session{
 		Name:          config.Name,
 		Dir:           lookupDir(config.Dir),
@@ -27,14 +30,10 @@ func newSession(config sessionConfig, options *Options) *session {
 
 	for _, winConfig := range config.Windows {
 		window := newWindow(sess, winConfig)
-		sess.addWindow(window)
+		sess.Windows = append(sess.Windows, window)
 	}
 
 	return sess
-}
-
-func (sess *session) addWindow(w *window) {
-	sess.Windows = append(sess.Windows, w)
 }
 
 func (sess *session) start() error {
@@ -44,17 +43,21 @@ func (sess *session) start() error {
 		return err
 	}
 
+	if len(sess.Windows) == 0 {
+		return errors.New("session has no window")
+	}
+
 	firstWindow := sess.Windows[0]
-	_, err = Exec("new-session", "-d", "-s", sess.Name, "-c", sess.Dir, "-n", firstWindow.Name, "-x", width, "-y", height)
+	_, err = tmux.Exec("new-session", "-d", "-s", sess.Name, "-c", sess.Dir, "-n", firstWindow.Name, "-x", width, "-y", height)
 	if err != nil {
-		return fmt.Errorf("error starting session %v", err)
+		return fmt.Errorf("starting session: %v", err)
 	}
 
 	if firstWindow.Dir != sess.Dir {
 		cdCmd := fmt.Sprintf("cd %s", firstWindow.Dir)
-		err := SendKeys(sess.Name+":"+firstWindow.Name, cdCmd)
+		err := tmux.SendKeys(sess.Name+":"+firstWindow.Name, cdCmd)
 		if err != nil {
-			return fmt.Errorf("error moving to dir %s, %v", firstWindow.Dir, err)
+			return fmt.Errorf("moving window to dir %s: %v", firstWindow.Dir, err)
 		}
 	}
 
@@ -62,7 +65,7 @@ func (sess *session) start() error {
 		for _, win := range sess.Windows[1:] {
 			err := win.start()
 			if err != nil {
-				return fmt.Errorf("Error starting window %v", err)
+				return fmt.Errorf("starting window %s: %v", win.Name, err)
 			}
 		}
 	}
@@ -70,7 +73,7 @@ func (sess *session) start() error {
 	for _, win := range sess.Windows {
 
 		for _, script := range sess.WindowScripts {
-			err := SendKeys(sess.Name+":"+win.Name, script)
+			err := tmux.SendKeys(sess.Name+":"+win.Name, script)
 			if err != nil {
 				return err
 			}
@@ -78,7 +81,7 @@ func (sess *session) start() error {
 
 		err := win.init()
 		if err != nil {
-			return fmt.Errorf("Error initializing window %v", err)
+			return fmt.Errorf("initializing window: %v", err)
 		}
 	}
 
@@ -88,12 +91,12 @@ func (sess *session) start() error {
 func (sess *session) attach() error {
 	tmux, err := exec.LookPath("tmux")
 	if err != nil {
-		return fmt.Errorf("Error looking up tmux %v", err)
+		return fmt.Errorf("looking up tmux: %v", err)
 	}
 
 	args := []string{"tmux", "attach", "-t", sess.Name}
 	if sysErr := syscall.Exec(tmux, args, os.Environ()); sysErr != nil {
-		return fmt.Errorf("Error attaching to session %s: %v", sess.Name, sysErr)
+		return fmt.Errorf("attaching to session: %v", sysErr)
 	}
 
 	return nil
@@ -106,5 +109,5 @@ func (sess *session) selectWindow(name string) (*window, error) {
 		}
 	}
 
-	return nil, fmt.Errorf("Window %s not found", name)
+	return nil, fmt.Errorf("window %s not found", name)
 }

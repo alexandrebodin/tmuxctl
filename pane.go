@@ -1,6 +1,10 @@
 package main
 
-import "strconv"
+import (
+	"strconv"
+
+	"github.com/alexandrebodin/tmuxctl/tmux"
+)
 
 type pane struct {
 	Dir     string
@@ -30,6 +34,6 @@ func newPane(win *window, config paneConfig, index int) *pane {
 }
 
 func (p *pane) selectPane() error {
-	_, err := Exec("select-pane", "-t", p.Target)
+	_, err := tmux.Exec("select-pane", "-t", p.Target)
 	return err
 }

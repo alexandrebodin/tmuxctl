@@ -3,6 +3,8 @@ package main
 import (
 	"fmt"
 	"strings"
+
+	"github.com/alexandrebodin/tmuxctl/tmux"
 )
 
 type window struct {
@@ -42,16 +44,18 @@ func newWindow(sess *session, config windowConfig) *window {
 }
 
 func (w *window) start() error {
-	args := []string{"new-window", "-t", w.Sess.Name, "-n", w.Name, "-c", w.Dir}
-	_, err := Exec(args...)
-	return err
+	_, err := tmux.Exec("new-window", "-t", w.Sess.Name, "-n", w.Name, "-c", w.Dir)
+	if err != nil {
+		return fmt.Errorf("starting window: %v", err)
+	}
+	return nil
 }
 
 func (w *window) runScripts() error {
 	for _, script := range w.Scripts {
-		err := SendKeys(w.Sess.Name+":"+w.Name, script)
+		err := tmux.SendKeys(w.Sess.Name+":"+w.Name, script)
 		if err != nil {
-			return err
+			return fmt.Errorf("run window scripts: %v", err)
 		}
 	}
 	return nil
@@ -85,7 +89,7 @@ func (w *window) init() error {
 	}
 
 	if w.Sync {
-		_, err := Exec("set-window-option", "-t", w.Target, "synchronize-panes")
+		_, err := tmux.Exec("set-window-option", "-t", w.Target, "synchronize-panes")
 		return err
 	}
 
@@ -95,14 +99,14 @@ func (w *window) init() error {
 func (w *window) runPaneScripts() error {
 	for _, pane := range w.Panes {
 		for _, script := range w.PaneScripts {
-			err := SendKeys(pane.Target, script)
+			err := tmux.SendKeys(pane.Target, script)
 			if err != nil {
 				return err
 			}
 		}
 
 		for _, script := range pane.Scripts {
-			err := SendKeys(pane.Target, script)
+			err := tmux.SendKeys(pane.Target, script)
 			if err != nil {
 				return err
 			}
@@ -110,7 +114,7 @@ func (w *window) runPaneScripts() error {
 
 		// clearing panes
 		if w.Sess.ClearPanes {
-			err := SendRawKeys(pane.Target, "C-l")
+			err := tmux.SendRawKeys(pane.Target, "C-l")
 			if err != nil {
 				return err
 			}
@@ -128,7 +132,7 @@ func (w *window) renderPane() error {
 
 	firstPane := w.Panes[0]
 	if firstPane.Dir != "" && firstPane.Dir != w.Dir { // we need to move the pane
-		err := SendKeys(firstPane.Target, "cd "+firstPane.Dir)
+		err := tmux.SendKeys(firstPane.Target, "cd "+firstPane.Dir)
 		if err != nil {
 			return err
 		}
@@ -140,7 +144,7 @@ func (w *window) renderPane() error {
 		if pane.Split != "" {
 			args = append(args, strings.Split(pane.Split, " ")...)
 		}
-		_, err := Exec(args...)
+		_, err := tmux.Exec(args...)
 		if err != nil {
 			return err
 		}
@@ -151,7 +155,7 @@ func (w *window) renderPane() error {
 
 func (w *window) renderLayout() error {
 	if w.Layout != "" {
-		_, err := Exec("select-layout", "-t", w.Target, w.Layout)
+		_, err := tmux.Exec("select-layout", "-t", w.Target, w.Layout)
 		return err
 	}
 
@@ -161,12 +165,13 @@ func (w *window) renderLayout() error {
 func (w *window) zoomPanes() error {
 	for _, pane := range w.Panes {
 		if pane.Zoom {
-			_, err := Exec("resize-pane", "-t", pane.Target, "-Z")
+			_, err := tmux.Exec("resize-pane", "-t", pane.Target, "-Z")
 			if err != nil {
 				return err
 			}
 
-			return nil // stop after first pane zoomed
+			// stop after first pane zoomed
+			return nil
 		}
 	}
 
@@ -174,13 +179,13 @@ func (w *window) zoomPanes() error {
 }
 
 func (w *window) selectWindow() error {
-	_, err := Exec("select-window", "-t", w.Target)
+	_, err := tmux.Exec("select-window", "-t", w.Target)
 	return err
 }
 
 func (w *window) selectPane(index int) (*pane, error) {
 	if index > len(w.Panes) {
-		return nil, fmt.Errorf("Pane %d not found", index)
+		return nil, fmt.Errorf("pane %d not found", index)
 	}
 
 	p := w.Panes[index-1]

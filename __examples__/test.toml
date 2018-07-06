@@ -6,7 +6,7 @@ select-window = "docker"
 # selects the pane to start in.
 # must select a window  first, otherwise ignored
 # first panel is 1 and so on...
-select-pane = 6
+# select-pane = 6
 
 # option to clear panes after init
 # clear-panes=true

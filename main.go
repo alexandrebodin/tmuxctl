@@ -8,6 +8,7 @@ import (
 	"github.com/BurntSushi/toml"
 	"github.com/alecthomas/kingpin"
 	"github.com/alexandrebodin/go-findup"
+	"github.com/alexandrebodin/tmuxctl/tmux"
 )
 
 var (
@@ -26,7 +27,7 @@ func main() {
 
 	filePath, err := findup.Find(*config)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatalf("Error locating config file %v\n", err)
 	}
 
 	var conf sessionConfig
@@ -34,26 +35,26 @@ func main() {
 		log.Fatalf("Error loading configuration %v\n", err)
 	}
 
-	runningSessions, err := ListSessions()
+	runningSessions, err := tmux.ListSessions()
 	if err != nil {
-		log.Fatal(err)
+		log.Fatalf("Error listing running sessions %v\n", err)
 	}
 
-	options, err := GetOptions()
+	options, err := tmux.GetOptions()
 	if err != nil {
-		log.Fatal(err)
+		log.Fatalf("Error getting tmux options %v\n", err)
 	}
 
 	sess := newSession(conf, options)
 	if _, ok := runningSessions[sess.Name]; ok {
-		log.Fatalf("Session %s is already running", sess.Name)
+		log.Fatalf("Session %s is already running\n", sess.Name)
 	}
 
 	checkError := func(err error) {
 		if err != nil {
 			log.Println(err)
 			// kill session if an error occurs after starting it
-			Exec("kill-session", "-t", sess.Name)
+			tmux.Exec("kill-session", "-t", sess.Name)
 			os.Exit(-1)
 		}
 	}
@@ -67,9 +68,6 @@ func main() {
 
 		if conf.SelectPane != 0 {
 			_, err := w.selectPane(conf.SelectPane)
-			// index := strconv.Itoa(conf.SelectPane + (options.PaneBaseIndex - 1))
-			// target := fmt.Sprintf("%s:%s.%s", sess.Name, conf.SelectWindow, index)
-			// _, err := Exec("select-pane", "-t", target)
 			checkError(err)
 		}
 	}
