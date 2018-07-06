@@ -5,16 +5,16 @@ import (
 	"log"
 	"os"
 
-	"github.com/BurntSushi/toml"
 	"github.com/alecthomas/kingpin"
 	"github.com/alexandrebodin/go-findup"
+	"github.com/alexandrebodin/tmuxctl/config"
 	"github.com/alexandrebodin/tmuxctl/tmux"
 )
 
 var (
-	version = "development"
-	start   = kingpin.Command("start", "start a tmux instance").Default()
-	config  = start.Arg("config", "Tmux config file").Default(".tmuxctlrc").String()
+	version    = "development"
+	start      = kingpin.Command("start", "start a tmux instance").Default()
+	configPath = start.Arg("config", "Tmux config file").Default(".tmuxctlrc").String()
 )
 
 func main() {
@@ -23,16 +23,21 @@ func main() {
 	kingpin.CommandLine.VersionFlag.Short('v')
 	kingpin.Parse()
 
-	fmt.Printf("Start tmux with config file: %v\n", *config)
+	fmt.Printf("Start tmux with config file: %v\n", *configPath)
 
-	filePath, err := findup.Find(*config)
+	filePath, err := findup.Find(*configPath)
 	if err != nil {
 		log.Fatalf("Error locating config file %v\n", err)
 	}
 
-	var conf sessionConfig
-	if _, err := toml.DecodeFile(filePath, &conf); err != nil {
-		log.Fatalf("Error loading configuration %v\n", err)
+	file, err := os.Open(filePath)
+	if err != nil {
+		log.Fatalf("Error openning config file %v\n", err)
+	}
+
+	conf, err := config.Parse(file)
+	if err != nil {
+		log.Fatalf("Error parsing %s: %v\n", filePath, err)
 	}
 
 	runningSessions, err := tmux.ListSessions()

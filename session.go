@@ -7,6 +7,7 @@ import (
 	"os/exec"
 	"syscall"
 
+	"github.com/alexandrebodin/tmuxctl/config"
 	"github.com/alexandrebodin/tmuxctl/tmux"
 )
 
@@ -19,7 +20,7 @@ type session struct {
 	WindowScripts []string
 }
 
-func newSession(config sessionConfig, options *tmux.Options) *session {
+func newSession(config config.Session, options *tmux.Options) *session {
 	sess := &session{
 		Name:          config.Name,
 		Dir:           lookupDir(config.Dir),

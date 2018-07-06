@@ -3,6 +3,7 @@ package main
 import (
 	"strconv"
 
+	"github.com/alexandrebodin/tmuxctl/config"
 	"github.com/alexandrebodin/tmuxctl/tmux"
 )
 
@@ -15,7 +16,7 @@ type pane struct {
 	Target  string
 }
 
-func newPane(win *window, config paneConfig, index int) *pane {
+func newPane(win *window, config config.Pane, index int) *pane {
 	normalizedIndex := strconv.Itoa(index + win.Sess.TmuxOptions.PaneBaseIndex)
 	pane := &pane{
 		Window:  win,

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/alexandrebodin/tmuxctl/config"
 	"github.com/alexandrebodin/tmuxctl/tmux"
 )
 
@@ -19,7 +20,7 @@ type window struct {
 	Target      string
 }
 
-func newWindow(sess *session, config windowConfig) *window {
+func newWindow(sess *session, config config.Window) *window {
 	win := &window{
 		Sess:        sess,
 		Name:        config.Name,
