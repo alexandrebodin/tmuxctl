@@ -1,6 +1,6 @@
 # tmuxctl
 
-Tmuxctl is a tmux session builder. 
+Tmuxctl is a tmux session manager. Read the [documentation](https://tmuxctl.netlify.com/) for instructions and examples.
 
 ## Quick start
 

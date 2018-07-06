@@ -1,5 +1,5 @@
 ---
-title: installation
+title: Installation
 ---
 
 You can install Tmuxctl with on of the methods bellow.
