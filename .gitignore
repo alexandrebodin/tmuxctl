@@ -17,3 +17,4 @@ tmuxctl
 # go dep vendor
 vendor/
 dist/
+build/
