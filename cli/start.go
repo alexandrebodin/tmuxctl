@@ -15,6 +15,7 @@ import (
 func init() {
 	var start = rootCmd.Command("start", "Start a tmux instance").Default()
 	configPath := start.Arg("config", "Tmux config file").Default(".tmuxctlrc").String()
+	test := start.Flag("test", "Test config file").Short('t').Bool()
 
 	start.Action(func(ctx *kingpin.ParseContext) error {
 		fmt.Printf("Start tmux with config file: %v\n", *configPath)
@@ -31,7 +32,13 @@ func init() {
 
 		conf, err := config.Parse(file)
 		if err != nil {
-			log.Fatalf("Error parsing %s: %v\n", filePath, err)
+			log.Fatalf("Error parsing %s: %v\n", file.Name(), err)
+		}
+
+		// stop after parsing in case of test
+		if *test {
+			fmt.Printf("Config file %s is valid\n", file.Name())
+			os.Exit(0)
 		}
 
 		runningSessions, err := tmux.ListSessions()
