@@ -1,4 +1,4 @@
-package main
+package builder
 
 import (
 	"fmt"
@@ -9,7 +9,7 @@ import (
 )
 
 type window struct {
-	Sess        *session
+	Sess        *Session
 	Name        string
 	Dir         string
 	Layout      string
@@ -20,7 +20,7 @@ type window struct {
 	Target      string
 }
 
-func newWindow(sess *session, config config.Window) *window {
+func newWindow(sess *Session, config config.Window) *window {
 	win := &window{
 		Sess:        sess,
 		Name:        config.Name,

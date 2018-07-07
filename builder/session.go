@@ -1,4 +1,4 @@
-package main
+package builder
 
 import (
 	"errors"
@@ -8,24 +8,31 @@ import (
 	"syscall"
 
 	"github.com/alexandrebodin/tmuxctl/config"
+	"github.com/alexandrebodin/tmuxctl/term"
 	"github.com/alexandrebodin/tmuxctl/tmux"
 )
 
-type session struct {
+// Session struct represents a tmux session
+type Session struct {
 	TmuxOptions   *tmux.Options
 	Name          string
 	Dir           string
 	Windows       []*window
 	ClearPanes    bool
 	WindowScripts []string
+	SelectWindow  string
+	SelectPane    int
 }
 
-func newSession(config config.Session, options *tmux.Options) *session {
-	sess := &session{
+// NewSession create a tmux session instance
+func NewSession(config config.Session, options *tmux.Options) *Session {
+	sess := &Session{
 		Name:          config.Name,
 		Dir:           lookupDir(config.Dir),
 		ClearPanes:    config.ClearPanes,
 		WindowScripts: config.WindowScripts,
+		SelectWindow:  config.SelectWindow,
+		SelectPane:    config.SelectPane,
 		TmuxOptions:   options,
 	}
 
@@ -37,9 +44,10 @@ func newSession(config config.Session, options *tmux.Options) *session {
 	return sess
 }
 
-func (sess *session) start() error {
+// Start starts a tmux sessions
+func (sess *Session) Start() error {
 	// get term size
-	width, height, err := getTermSize()
+	width, height, err := term.GetDimensions()
 	if err != nil {
 		return err
 	}
@@ -86,10 +94,25 @@ func (sess *session) start() error {
 		}
 	}
 
+	if sess.SelectWindow != "" {
+		w, err := sess.selectWindow(sess.SelectWindow)
+		if err != nil {
+			return err
+		}
+
+		if sess.SelectPane != 0 {
+			_, err := w.selectPane(sess.SelectPane)
+			if err != nil {
+				return err
+			}
+		}
+	}
+
 	return nil
 }
 
-func (sess *session) attach() error {
+// Attach attaches the process to the tmux session
+func (sess *Session) Attach() error {
 	tmux, err := exec.LookPath("tmux")
 	if err != nil {
 		return fmt.Errorf("looking up tmux: %v", err)
@@ -103,7 +126,7 @@ func (sess *session) attach() error {
 	return nil
 }
 
-func (sess *session) selectWindow(name string) (*window, error) {
+func (sess *Session) selectWindow(name string) (*window, error) {
 	for _, w := range sess.Windows {
 		if w.Name == name {
 			return w, w.selectWindow()

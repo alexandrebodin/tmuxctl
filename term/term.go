@@ -1,4 +1,4 @@
-package main
+package term
 
 import (
 	"bytes"
@@ -8,7 +8,8 @@ import (
 	"strings"
 )
 
-func getTermSize() (string, string, error) {
+// GetDimensions returns a term dimensions
+func GetDimensions() (string, string, error) {
 	cmd := exec.Command("stty", "size")
 	var stderr bytes.Buffer
 	var stdout bytes.Buffer
