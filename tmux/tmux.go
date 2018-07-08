@@ -8,9 +8,6 @@ import (
 	"strings"
 )
 
-// Runner is the underlying struct to run tmux commands
-type Runner struct{}
-
 // Options tmux options
 type Options struct {
 	BaseIndex     int
@@ -23,13 +20,13 @@ type Result struct {
 	Stderr string
 }
 
-// Exec runs a command
-func (r *Runner) Exec(args ...string) (Result, error) {
+// ExecFunc is the execution func (uses exec.Command)
+var ExecFunc = func(name string, args ...string) (Result, error) {
 	var stdin bytes.Buffer
 	var stderr bytes.Buffer
 	var stdout bytes.Buffer
 
-	cmd := exec.Command("tmux", args...)
+	cmd := exec.Command(name, args...)
 	cmd.Stdin = &stdin
 	cmd.Stdout = &stdout
 	cmd.Stderr = &stderr
@@ -42,14 +39,19 @@ func (r *Runner) Exec(args ...string) (Result, error) {
 	return Result{stdout.String(), stderr.String()}, nil
 }
 
+// Exec runs a tmux command
+func Exec(args ...string) (Result, error) {
+	return ExecFunc("tmux", args...)
+}
+
 // SendKeys sends keys to tmux (e.g to run a command)
-func (r *Runner) SendKeys(target, keys string) error {
-	_, err := r.Exec("send-keys", "-R", "-t", target, keys, "C-m")
+func SendKeys(target, keys string) error {
+	_, err := Exec("send-keys", "-R", "-t", target, keys, "C-m")
 	return err
 }
 
 // SendRawKeys sends keys to tmux (e.g to run a command)
-func (r *Runner) SendRawKeys(target, keys string) error {
+func SendRawKeys(target, keys string) error {
 	_, err := Exec("send-keys", "-R", "-t", target, keys)
 	return err
 }
@@ -58,7 +60,7 @@ func (r *Runner) SendRawKeys(target, keys string) error {
 type SessionInfo struct{}
 
 // ListSessions returns the list of sessions currently running
-func (r *Runner) ListSessions() (map[string]SessionInfo, error) {
+func ListSessions() (map[string]SessionInfo, error) {
 	sessionMap := make(map[string]SessionInfo)
 
 	res, err := Exec("ls")
@@ -81,23 +83,18 @@ func (r *Runner) ListSessions() (map[string]SessionInfo, error) {
 }
 
 // GetOptions get tmux options
-func (r *Runner) GetOptions() (*Options, error) {
+func GetOptions() (*Options, error) {
 	options := &Options{
 		BaseIndex:     0,
 		PaneBaseIndex: 0,
 	}
 
-	var stderr bytes.Buffer
-	var stdout bytes.Buffer
-	cmd := exec.Command("sh", "-c", "tmux start-server\\; show-options -g\\; show-window-options -g")
-	cmd.Stdout = &stdout
-
-	err := cmd.Run()
+	result, err := ExecFunc("sh", "-c", "tmux start-server\\; show-options -g\\; show-window-options -g")
 	if err != nil {
-		return options, fmt.Errorf("Error getting tmux options %v, %s", err, stderr.String())
+		return options, fmt.Errorf("loading tmux options: %v", err)
 	}
 
-	optionsString := strings.Split(stdout.String(), "\n")
+	optionsString := strings.Split(result.Stdout, "\n")
 	for _, option := range optionsString {
 		optionSplits := strings.Split(option, " ")
 		if len(optionSplits) == 2 {
