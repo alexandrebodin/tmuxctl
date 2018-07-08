@@ -1,5 +1,7 @@
 # tmuxctl
 
+[![Build Status](https://travis-ci.org/alexandrebodin/tmuxctl.svg?branch=master)](https://travis-ci.org/alexandrebodin/tmuxctl) [![Go Report Card](https://goreportcard.com/badge/github.com/alexandrebodin/tmuxctl)](https://goreportcard.com/report/github.com/alexandrebodin/tmuxctl)
+
 Tmuxctl is a tmux session manager. Read the [documentation](https://tmuxctl.netlify.com/) for instructions and examples.
 
 ## Quick start

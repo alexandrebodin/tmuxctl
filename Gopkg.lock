@@ -35,14 +35,43 @@
   revision = "59888d10a1b88cca6f370bac45bf153853b96c7a"
 
 [[projects]]
+  name = "github.com/davecgh/go-spew"
+  packages = ["spew"]
+  revision = "346938d642f2ec3594ed81d874461961cd0faa76"
+  version = "v1.1.0"
+
+[[projects]]
   branch = "master"
   name = "github.com/pkg/browser"
   packages = ["."]
   revision = "c90ca0c84f15f81c982e32665bffd8d7aac8f097"
 
+[[projects]]
+  name = "github.com/pmezard/go-difflib"
+  packages = ["difflib"]
+  revision = "792786c7400a136282c1664665ae0a8db921c6c2"
+  version = "v1.0.0"
+
+[[projects]]
+  name = "github.com/stretchr/objx"
+  packages = ["."]
+  revision = "477a77ecc69700c7cdeb1fa9e129548e1c1c393c"
+  version = "v0.1.1"
+
+[[projects]]
+  name = "github.com/stretchr/testify"
+  packages = [
+    ".",
+    "assert",
+    "http",
+    "mock"
+  ]
+  revision = "f35b8ab0b5a2cef36673838d662e249dd9c94686"
+  version = "v1.2.2"
+
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "b2269e35c45b7775b8eabb4be733e3f80c7cd37fc85fa05a435064a6fd806e41"
+  inputs-digest = "42ed991431e1367128397e4a05a6d11e681b775945cfdbd6eeed1f9d8d3a3a30"
   solver-name = "gps-cdcl"
   solver-version = 1
