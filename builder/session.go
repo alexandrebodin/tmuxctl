@@ -1,7 +1,6 @@
 package builder
 
 import (
-	"errors"
 	"fmt"
 	"os"
 	"os/exec"
@@ -53,20 +52,21 @@ func (sess *Session) Start() error {
 	}
 
 	if len(sess.Windows) == 0 {
-		return errors.New("session has no window")
-	}
+		_, err = tmux.Exec("new-session", "-d", "-s", sess.Name, "-c", sess.Dir, "-x", width, "-y", height)
+	} else {
 
-	firstWindow := sess.Windows[0]
-	_, err = tmux.Exec("new-session", "-d", "-s", sess.Name, "-c", sess.Dir, "-n", firstWindow.Name, "-x", width, "-y", height)
-	if err != nil {
-		return fmt.Errorf("starting session: %v", err)
-	}
-
-	if firstWindow.Dir != sess.Dir {
-		cdCmd := fmt.Sprintf("cd %s", firstWindow.Dir)
-		err := tmux.SendKeys(sess.Name+":"+firstWindow.Name, cdCmd)
+		firstWindow := sess.Windows[0]
+		_, err = tmux.Exec("new-session", "-d", "-s", sess.Name, "-c", sess.Dir, "-n", firstWindow.Name, "-x", width, "-y", height)
 		if err != nil {
-			return fmt.Errorf("moving window to dir %s: %v", firstWindow.Dir, err)
+			return fmt.Errorf("starting session: %v", err)
+		}
+
+		if firstWindow.Dir != sess.Dir {
+			cdCmd := fmt.Sprintf("cd %s", firstWindow.Dir)
+			err := tmux.SendKeys(firstWindow.Target, cdCmd)
+			if err != nil {
+				return fmt.Errorf("moving window to dir %s: %v", firstWindow.Dir, err)
+			}
 		}
 	}
 
@@ -80,9 +80,8 @@ func (sess *Session) Start() error {
 	}
 
 	for _, win := range sess.Windows {
-
 		for _, script := range sess.WindowScripts {
-			err := tmux.SendKeys(sess.Name+":"+win.Name, script)
+			err := tmux.SendKeys(win.Target, script)
 			if err != nil {
 				return err
 			}

@@ -2,7 +2,7 @@
 title: Installation
 ---
 
-You can install Tmuxctl with on of the methods bellow.
+You can install Tmuxctl with one of the methods bellow.
 
 The recommended method is to run the following command, which installs `tmuxctl` in ./bin/tmuxctl by default.
 ```

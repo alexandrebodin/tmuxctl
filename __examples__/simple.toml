@@ -1,0 +1,6 @@
+name="simple-session"
+dir="~/"
+select-window=""
+select-pane=1
+clear-panes=true
+window-scripts=["ls"]

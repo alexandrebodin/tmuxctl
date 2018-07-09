@@ -1,0 +1,6 @@
+name="single-window-session"
+dir="~/Desktop"
+
+[[windows]]
+name="window-one"
+dir="~/"

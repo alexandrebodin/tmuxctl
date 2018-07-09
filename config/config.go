@@ -1,7 +1,6 @@
 package config
 
 import (
-	"errors"
 	"fmt"
 	"io"
 
@@ -49,11 +48,6 @@ var (
 )
 
 func checkValid(conf Session) error {
-	// check at least one window
-	if len(conf.Windows) == 0 {
-		return errors.New("you must declare at least on window (0 provided)")
-	}
-
 	// check select-window and select-pane exist
 	if conf.SelectWindow != "" {
 		var win Window
