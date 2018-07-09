@@ -65,10 +65,7 @@ func ListSessions() (map[string]SessionInfo, error) {
 
 	res, err := Exec("ls")
 	if err != nil {
-		if strings.Contains(err.Error(), "no server running on") {
-			return sessionMap, nil
-		}
-		return sessionMap, fmt.Errorf("error listing sessions %v", err)
+		return sessionMap, nil
 	}
 
 	splits := strings.Split(res.Stdout, "\n")
