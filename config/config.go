@@ -101,7 +101,7 @@ func Parse(reader io.ReadCloser) (Session, error) {
 	}
 
 	if err := checkValid(conf); err != nil {
-		return conf, err
+		return conf, fmt.Errorf("invalid configuration: %v", err)
 	}
 
 	return conf, nil
