@@ -6,10 +6,10 @@ name="window-one"
 dir="~/dev"
 
 [[windows]]
-dir="~/dev/bloom"
+dir="~/dev/project"
 
   [[windows.panes]]
   [[windows.panes]]
-    dir="~/dev/bloom/dashboard"
+    dir="~/dev/project/src"
 
 [[windows]]

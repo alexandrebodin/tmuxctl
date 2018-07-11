@@ -152,11 +152,9 @@ func (w *window) renderPane() error {
 	}
 
 	for _, pane := range w.Panes {
-		if pane.Dir != w.Dir {
-			err := tmux.SendKeys(pane.Target, "cd "+pane.Dir)
-			if err != nil {
-				return err
-			}
+		err := tmux.SendKeys(pane.Target, "cd "+pane.Dir)
+		if err != nil {
+			return err
 		}
 	}
 
