@@ -2,6 +2,7 @@ package builder
 
 import (
 	"fmt"
+	"strconv"
 	"strings"
 
 	"github.com/alexandrebodin/tmuxctl/config"
@@ -9,6 +10,7 @@ import (
 )
 
 type window struct {
+	Idx         int
 	Sess        *Session
 	Name        string
 	Dir         string
@@ -20,19 +22,25 @@ type window struct {
 	Target      string
 }
 
-func newWindow(sess *Session, config config.Window) *window {
+func newWindow(sess *Session, config config.Window, idx int) *window {
 	win := &window{
+		Idx:         idx,
 		Sess:        sess,
 		Name:        config.Name,
 		Layout:      config.Layout,
 		Sync:        config.Sync,
 		Scripts:     config.Scripts,
 		PaneScripts: config.PaneScripts,
-		Target:      sess.Name + ":" + config.Name,
+	}
+
+	if config.Name == "" {
+		win.Target = sess.Name + ":" + strconv.Itoa(idx+sess.TmuxOptions.BaseIndex)
+	} else {
+		win.Target = sess.Name + ":" + config.Name
 	}
 
 	if config.Dir != "" {
-		win.Dir = lookupDir(config.Dir)
+		win.Dir = config.Dir
 	} else {
 		win.Dir = sess.Dir
 	}
@@ -131,16 +139,8 @@ func (w *window) renderPane() error {
 		return nil
 	}
 
-	firstPane := w.Panes[0]
-	if firstPane.Dir != "" && firstPane.Dir != w.Dir { // we need to move the pane
-		err := tmux.SendKeys(firstPane.Target, "cd "+firstPane.Dir)
-		if err != nil {
-			return err
-		}
-	}
-
 	for _, pane := range w.Panes[1:] {
-		args := []string{"split-window", "-t", w.Target, "-c", pane.Dir}
+		args := []string{"split-window", "-t", w.Target}
 
 		if pane.Split != "" {
 			args = append(args, strings.Split(pane.Split, " ")...)
@@ -148,6 +148,15 @@ func (w *window) renderPane() error {
 		_, err := tmux.Exec(args...)
 		if err != nil {
 			return err
+		}
+	}
+
+	for _, pane := range w.Panes {
+		if pane.Dir != w.Dir {
+			err := tmux.SendKeys(pane.Target, "cd "+pane.Dir)
+			if err != nil {
+				return err
+			}
 		}
 	}
 

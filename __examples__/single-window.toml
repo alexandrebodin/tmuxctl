@@ -3,4 +3,13 @@ dir="~/Desktop"
 
 [[windows]]
 name="window-one"
-dir="~/"
+dir="~/dev"
+
+[[windows]]
+dir="~/dev/bloom"
+
+  [[windows.panes]]
+  [[windows.panes]]
+    dir="~/dev/bloom/dashboard"
+
+[[windows]]

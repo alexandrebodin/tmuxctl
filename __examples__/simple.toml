@@ -1,5 +1,5 @@
 name="simple-session"
-dir="~/"
+dir="~/dev"
 select-window=""
 select-pane=1
 clear-panes=true

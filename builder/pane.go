@@ -27,7 +27,7 @@ func newPane(win *window, config config.Pane, index int) *pane {
 	}
 
 	if config.Dir != "" {
-		pane.Dir = lookupDir(config.Dir)
+		pane.Dir = config.Dir
 	} else {
 		pane.Dir = win.Dir
 	}

@@ -27,7 +27,7 @@ type Session struct {
 func NewSession(config config.Session, options *tmux.Options) *Session {
 	sess := &Session{
 		Name:          config.Name,
-		Dir:           lookupDir(config.Dir),
+		Dir:           config.Dir,
 		ClearPanes:    config.ClearPanes,
 		WindowScripts: config.WindowScripts,
 		SelectWindow:  config.SelectWindow,
@@ -35,8 +35,8 @@ func NewSession(config config.Session, options *tmux.Options) *Session {
 		TmuxOptions:   options,
 	}
 
-	for _, winConfig := range config.Windows {
-		window := newWindow(sess, winConfig)
+	for idx, winConfig := range config.Windows {
+		window := newWindow(sess, winConfig, idx)
 		sess.Windows = append(sess.Windows, window)
 	}
 
@@ -51,23 +51,17 @@ func (sess *Session) Start() error {
 		return err
 	}
 
+	args := []string{"new-session", "-d", "-s", sess.Name, "-x", width, "-y", height}
 	if len(sess.Windows) == 0 {
-		_, err = tmux.Exec("new-session", "-d", "-s", sess.Name, "-c", sess.Dir, "-x", width, "-y", height)
+		_, err = tmux.Exec()
 	} else {
-
 		firstWindow := sess.Windows[0]
-		_, err = tmux.Exec("new-session", "-d", "-s", sess.Name, "-c", sess.Dir, "-n", firstWindow.Name, "-x", width, "-y", height)
-		if err != nil {
-			return fmt.Errorf("starting session: %v", err)
-		}
+		args = append(args, "-n", firstWindow.Name)
+	}
 
-		if firstWindow.Dir != sess.Dir {
-			cdCmd := fmt.Sprintf("cd %s", firstWindow.Dir)
-			err := tmux.SendKeys(firstWindow.Target, cdCmd)
-			if err != nil {
-				return fmt.Errorf("moving window to dir %s: %v", firstWindow.Dir, err)
-			}
-		}
+	_, err = tmux.Exec(args...)
+	if err != nil {
+		return fmt.Errorf("starting session: %v", err)
 	}
 
 	if len(sess.Windows) > 1 {
@@ -80,14 +74,19 @@ func (sess *Session) Start() error {
 	}
 
 	for _, win := range sess.Windows {
+		err := tmux.SendKeys(win.Target, fmt.Sprintf("cd %s", win.Dir))
+		if err != nil {
+			return fmt.Errorf("moving window to dir %s: %v", win.Dir, err)
+		}
+
 		for _, script := range sess.WindowScripts {
 			err := tmux.SendKeys(win.Target, script)
 			if err != nil {
-				return err
+				return fmt.Errorf("running window scripts: %v", err)
 			}
 		}
 
-		err := win.init()
+		err = win.init()
 		if err != nil {
 			return fmt.Errorf("initializing window: %v", err)
 		}
