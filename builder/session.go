@@ -24,20 +24,25 @@ type Session struct {
 }
 
 // NewSession create a tmux session instance
-func NewSession(config config.Session, options *tmux.Options) *Session {
+func NewSession(sessConfig config.Session, options *tmux.Options) *Session {
 	sess := &Session{
-		Name:          config.Name,
-		Dir:           config.Dir,
-		ClearPanes:    config.ClearPanes,
-		WindowScripts: config.WindowScripts,
-		SelectWindow:  config.SelectWindow,
-		SelectPane:    config.SelectPane,
+		Name:          sessConfig.Name,
+		Dir:           sessConfig.Dir,
+		ClearPanes:    sessConfig.ClearPanes,
+		WindowScripts: sessConfig.WindowScripts,
+		SelectWindow:  sessConfig.SelectWindow,
+		SelectPane:    sessConfig.SelectPane,
 		TmuxOptions:   options,
 	}
 
-	for idx, winConfig := range config.Windows {
-		window := newWindow(sess, winConfig, idx)
-		sess.Windows = append(sess.Windows, window)
+	// if no window specified, create a default one
+	if len(sessConfig.Windows) == 0 {
+		sess.Windows = []*window{newWindow(sess, config.Window{}, 0)}
+	} else {
+		for idx, winConfig := range sessConfig.Windows {
+			window := newWindow(sess, winConfig, idx)
+			sess.Windows = append(sess.Windows, window)
+		}
 	}
 
 	return sess
@@ -64,26 +69,15 @@ func (sess *Session) Start() error {
 		return fmt.Errorf("starting session: %v", err)
 	}
 
-	if len(sess.Windows) > 1 {
-		for _, win := range sess.Windows[1:] {
-			err := win.start()
-			if err != nil {
-				return fmt.Errorf("starting window %s: %v", win.Name, err)
-			}
-		}
-	}
-
 	for _, win := range sess.Windows {
-		err := tmux.SendKeys(win.Target, fmt.Sprintf("cd %s", win.Dir))
+		err := win.start()
 		if err != nil {
-			return fmt.Errorf("moving window to dir %s: %v", win.Dir, err)
+			return fmt.Errorf("starting window %s: %v", win.Name, err)
 		}
 
-		for _, script := range sess.WindowScripts {
-			err := tmux.SendKeys(win.Target, script)
-			if err != nil {
-				return fmt.Errorf("running window scripts: %v", err)
-			}
+		err = win.RunScripts(sess.WindowScripts)
+		if err != nil {
+			return fmt.Errorf("running window scripts: %v", err)
 		}
 
 		err = win.init()

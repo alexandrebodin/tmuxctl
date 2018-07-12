@@ -53,15 +53,23 @@ func newWindow(sess *Session, config config.Window, idx int) *window {
 }
 
 func (w *window) start() error {
-	_, err := tmux.Exec("new-window", "-t", w.Sess.Name, "-n", w.Name, "-c", w.Dir)
-	if err != nil {
-		return fmt.Errorf("starting window: %v", err)
+	if w.Idx > 0 {
+		_, err := tmux.Exec("new-window", "-t", w.Sess.Name, "-n", w.Name, "-c", w.Dir)
+		if err != nil {
+			return fmt.Errorf("starting window: %v", err)
+		}
 	}
+
+	err := tmux.SendKeys(w.Target, fmt.Sprintf("cd %s", w.Dir))
+	if err != nil {
+		return fmt.Errorf("moving window to dir %s: %v", w.Dir, err)
+	}
+
 	return nil
 }
 
-func (w *window) runScripts() error {
-	for _, script := range w.Scripts {
+func (w *window) RunScripts(scripts []string) error {
+	for _, script := range scripts {
 		err := tmux.SendKeys(w.Sess.Name+":"+w.Name, script)
 		if err != nil {
 			return fmt.Errorf("run window scripts: %v", err)
@@ -72,7 +80,7 @@ func (w *window) runScripts() error {
 
 func (w *window) init() error {
 	var err error
-	err = w.runScripts()
+	err = w.RunScripts(w.Scripts)
 	if err != nil {
 		return err
 	}
