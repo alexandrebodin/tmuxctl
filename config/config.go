@@ -9,32 +9,32 @@ import (
 
 // Pane contains a pane configuration
 type Pane struct {
-	Dir     string
-	Zoom    bool
-	Split   string
-	Scripts []string
+	Dir     string   `toml:"dir"`
+	Zoom    bool     `toml:"zoom"`
+	Split   string   `toml:"split"`
+	Scripts []string `toml:"scripts"`
 }
 
 // Window contains a window configuration
 type Window struct {
-	Name        string
-	Dir         string
-	Layout      string
-	Sync        bool
-	Scripts     []string
-	Panes       []Pane
+	Name        string   `toml:"name"`
+	Dir         string   `toml:"dir"`
+	Layout      string   `toml:"layout"`
+	Sync        bool     `toml:"sync"`
+	Scripts     []string `toml:"scripts"`
 	PaneScripts []string `toml:"pane-scripts"`
+	Panes       []Pane   `toml:"panes"`
 }
 
 // Session contains a tmux session configuration
 type Session struct {
-	Name          string
-	Dir           string
-	ClearPanes    bool `toml:"clear-panes"`
-	Windows       []Window
+	Name          string   `toml:"name"`
+	Dir           string   `toml:"dir"`
+	ClearPanes    bool     `toml:"clear-panes"`
 	SelectWindow  string   `toml:"select-window"`
 	SelectPane    int      `toml:"select-pane"`
 	WindowScripts []string `toml:"window-scripts"`
+	Windows       []Window `toml:"windows"`
 }
 
 var (
