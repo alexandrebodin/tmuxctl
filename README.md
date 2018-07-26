@@ -1,6 +1,7 @@
 # tmuxctl
 
 [![Build Status](https://travis-ci.org/alexandrebodin/tmuxctl.svg?branch=master)](https://travis-ci.org/alexandrebodin/tmuxctl) [![Go Report Card](https://goreportcard.com/badge/github.com/alexandrebodin/tmuxctl)](https://goreportcard.com/report/github.com/alexandrebodin/tmuxctl)
+[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Falexandrebodin%2Ftmuxctl.svg?type=shield)](https://app.fossa.io/projects/git%2Bgithub.com%2Falexandrebodin%2Ftmuxctl?ref=badge_shield)
 
 Tmuxctl is a tmux session manager. Read the [documentation](https://tmuxctl.netlify.com/) for instructions and examples.
 
@@ -65,3 +66,6 @@ Start your tmux session:
 ```
 $ tmuxctl
 ```
+
+## License
+[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Falexandrebodin%2Ftmuxctl.svg?type=large)](https://app.fossa.io/projects/git%2Bgithub.com%2Falexandrebodin%2Ftmuxctl?ref=badge_large)
