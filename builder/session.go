@@ -35,6 +35,14 @@ func NewSession(sessConfig config.Session, options *tmux.Options) *Session {
 		TmuxOptions:   options,
 	}
 
+	// set dir to current working dir if not defined
+	if sess.Dir == "" {
+		dir, err := os.Getwd()
+		if err == nil {
+			sess.Dir = dir
+		}
+	}
+
 	// if no window specified, create a default one
 	if len(sessConfig.Windows) == 0 {
 		sess.Windows = []*window{newWindow(sess, config.Window{}, 0)}
