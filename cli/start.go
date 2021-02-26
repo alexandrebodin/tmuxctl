@@ -18,21 +18,20 @@ func init() {
 	test := start.Flag("test", "Test config file").Short('t').Bool()
 
 	start.Action(func(ctx *kingpin.ParseContext) error {
-		fmt.Printf("Start tmux with config file: %v\n", *configPath)
 
 		filePath, err := findup.Find(*configPath)
 		if err != nil {
-			log.Fatalf("Error locating config file %v\n", err)
+			kingpin.FatalUsageContext(ctx, "locating config file: %v", err)
 		}
 
 		file, err := os.Open(filePath)
 		if err != nil {
-			log.Fatalf("Error openning config file %v\n", err)
+			kingpin.FatalUsageContext(ctx, "Error openning config file %v\n", err)
 		}
 
 		conf, err := config.Parse(file)
 		if err != nil {
-			log.Fatalf("Error parsing %s: %v\n", file.Name(), err)
+			kingpin.FatalUsageContext(ctx, "Error parsing %s: %v\n", file.Name(), err)
 		}
 
 		// stop after parsing in case of test
@@ -41,19 +40,21 @@ func init() {
 			os.Exit(0)
 		}
 
+		fmt.Printf("Start tmux with config file: %v\n", *configPath)
+
 		runningSessions, err := tmux.ListSessions()
 		if err != nil {
-			log.Fatalf("Error listing running sessions %v\n", err)
+			kingpin.FatalUsageContext(ctx, "Error listing running sessions %v\n", err)
 		}
 
 		options, err := tmux.GetOptions()
 		if err != nil {
-			log.Fatalf("Error getting tmux options %v\n", err)
+			kingpin.FatalUsageContext(ctx, "Error getting tmux options %v\n", err)
 		}
 
 		sess := builder.NewSession(conf, options)
 		if _, ok := runningSessions[sess.Name]; ok {
-			log.Fatalf("Session %s is already running\n", sess.Name)
+			kingpin.FatalUsageContext(ctx, "Session %s is already running\n", sess.Name)
 		}
 
 		checkError := func(err error) {

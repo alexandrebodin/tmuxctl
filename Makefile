@@ -18,3 +18,13 @@ test.ci:
 	@echo "Running test"
 	@go test -v ./...
 .PHONY: test.ci
+
+build:
+	@echo "Building"
+	@go build
+.PHONY: build
+
+docs:
+	@echo "Building docs"
+	@static-docs --in docs --out build
+.PHONY: docs
